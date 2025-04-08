@@ -1,8 +1,9 @@
-<!-- register.html -->
+<!-- registerUsedUser.html -->
 
 <html>
   <body>
     <h1>Register</h1> <br>
+    Username already taken.<br>
     <form action='registerRequest' method='post'>
     <div style="display: flex; flex-direction: column; width: 200px;">
     Username: <input type='text' name='username'/> <br>
@@ -11,7 +12,6 @@
     Confirm Password: <input type='text' name='password2'/> <br>
     </div>
     <div style='height:5px;'> <br> </div>
-    <input type='submit' value='Go'>
-    {{ error }} <br>
+    <input type='submit' value='Go'>    
   </body>
 </html>
