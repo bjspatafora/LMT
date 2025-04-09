@@ -8,23 +8,30 @@ database = db('root', 'root') #CHANGE TO USER/PASSWORD OF MYSQL
 @app.route('/')
 @app.route('/index')
 def index():
-    if session.get('User', None):
+    if session.get('LoggedIn', None):
         return render_template('index.html', user=session['User'])
     else:
         return redirect(url_for('login'))
 
 @app.route('/login')
 def login():
-    return render_template('login.html')
+    return render_template('login.html', error='')
+
+@app.route('/loginErr')
+def loginErr():
+    return render_template('login.html', error='Invalid username/password')
 
 @app.route('/loginRequest', methods = ["POST"])
 def loginRequest():
     username = request.form.get("username", None)
     password = request.form.get("password", None)
     
-    if True: # valid login Information
+    if database.login(username, password): # valid login Information
         session['User'] = username
+        session['LoggedIn'] = 1
         return redirect(url_for('index'))
+    else:
+        return redirect(url_for('loginErr'))
 
 @app.route('/logout')
 def logout():

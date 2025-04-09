@@ -25,10 +25,11 @@ DROP TABLE IF EXISTS `Register`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Register` (
   `username` varchar(100) NOT NULL,
-  `password` varchar(100) NOT NULL,
+  `password` varbinary(100) DEFAULT NULL,
   `email` varchar(100) NOT NULL,
   `validTimeout` timestamp NOT NULL,
   `valcode` char(6) NOT NULL,
+  `salt` varbinary(50) DEFAULT NULL,
   PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -52,11 +53,12 @@ DROP TABLE IF EXISTS `User`;
 CREATE TABLE `User` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(100) NOT NULL,
-  `password` varchar(100) NOT NULL,
+  `password` varbinary(100) DEFAULT NULL,
   `email` varchar(100) NOT NULL,
+  `salt` varbinary(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,7 +68,7 @@ CREATE TABLE `User` (
 LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
 INSERT INTO `User` VALUES
-(3,'test1','test1Test!','bspat11037@gmail.com');
+(5,'test1','$2b$12$AM.KkF6tDtU0xI9ez3z2m.hJ16K5gnSg2k2OnedZSd7ESo8VDAoIq','bspat11037@gmail.com','$2b$12$AM.KkF6tDtU0xI9ez3z2m.');
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -79,4 +81,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-08 16:37:31
+-- Dump completed on 2025-04-09 12:12:31

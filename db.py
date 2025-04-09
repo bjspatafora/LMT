@@ -4,6 +4,7 @@ import pymysql
 from datetime import datetime, timedelta
 import random
 import myemail
+import bcrypt
 
 class db:
     def __init__(self, usr, pwd):
@@ -21,18 +22,19 @@ class db:
             myemail.verifemail(email, code)
         except Exception as e:
             raise Exception("Error: %s" % e)
+
+        salt = bcrypt.gensalt()
+        pwd = bcrypt.hashpw(password.encode('utf-8'), salt)
         
         timestamp = datetime.now() + timedelta(minutes=30)
-        self.__cursor.execute('insert Register(username, email, password, ' \
-                              'validTimeout, valcode) ' \
-                              'values(%s, %s, %s, %s, %s)',
-                              (username, email, password, timestamp, code))
+        self.__cursor.execute('insert Register(username, email, password, salt, validTimeout, valcode) values(%s, %s, %s, %s, %s, %s)',
+                              (username, email, pwd, salt, timestamp, code))
         self.__cursor.execute('commit')
         return code
 
-    def insertUser(self, username, email, password):
+    def insertUser(self, username, email, password, salt):
         self.__cursor.execute('delete from Register where username=%s', (username))
-        self.__cursor.execute('insert User(username, email, password) values(%s, %s, %s)', (username, email, password))
+        self.__cursor.execute('insert User(username, email, password, salt) values(%s, %s, %s, %s)', (username, email, password, salt))
         self.__cursor.execute('commit')
         
     def validate(self, username, code):
@@ -42,9 +44,15 @@ class db:
             return False
         email = res['email']
         password = res['password']
-        self.insertUser(username, email, password)
+        salt = res['salt']
+        self.insertUser(username, email, password, salt)
         return True
 
     def availUsername(self, username):
         self.__cursor.execute('(select username from User where username=%s) union (select username from Register where username=%s)', (username, username))
         return self.__cursor.fetchone() is None
+
+    def login(self, username, password):
+        self.__cursor.execute('select password, salt from User where username=%s', (username))
+        res = self.__cursor.fetchone()
+        return bcrypt.checkpw(password.encode('utf-8'), res["password"])
