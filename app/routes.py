@@ -9,7 +9,11 @@ database = db('root', 'root') #CHANGE TO USER/PASSWORD OF MYSQL
 @app.route('/index')
 def index():
     if session.get('LoggedIn', None):
-        return render_template('index.html', user=session['User'])
+        if database.isLibrarian(session['User']):
+            return render_template('LibrarianIndex.html',
+                                   user=session['User'])
+        else:
+            return render_template('index.html', user=session['User'])
     else:
         return redirect(url_for('login'))
 
@@ -88,7 +92,3 @@ def validateRequest():
         return redirect(url_for('index'))
     else:
         return render_template('validateRetry.html')
-
-@app.route('/checkouts')
-def checkouts():
-    

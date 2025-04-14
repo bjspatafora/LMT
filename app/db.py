@@ -56,3 +56,7 @@ class db:
         self.__cursor.execute('select password, salt from User where username=%s', (username))
         res = self.__cursor.fetchone()
         return bcrypt.checkpw(password.encode('utf-8'), res["password"])
+
+    def isLibrarian(self, username):
+        self.__cursor.execute('select * from User where username=%s and librarian', (username));
+        return self.__cursor.fetchone() is not None;
