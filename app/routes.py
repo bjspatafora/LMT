@@ -88,3 +88,7 @@ def validateRequest():
         return redirect(url_for('index'))
     else:
         return render_template('validateRetry.html')
+
+@app.route('/checkouts')
+def checkouts():
+    
