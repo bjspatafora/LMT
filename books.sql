@@ -8,10 +8,10 @@ values (9781250007209, 'Cinder', 2013, 'Humans and androids crowd the raucous st
 (9781250104458, 'Stars Above', 2016, 'The universe of the Lunar Chronicles holds stories—and secrets—that are wondrous, vicious, and romantic. How did Cinder first arrive in New Beijing? How did the brooding soldier Wolf transform from young man to killer? When did Princess Winter and the palace guard Jacin realize their destinies?'),
 (9781250069665, 'Fairest', 2015, 'Queen Levana is a ruler who uses her ''glamour'' to gain power. But long before she crossed paths with Cinder, Scarlet, and Cress, Levana lived a very different story-a story that has never been told... until now');
 
-insert into BookGenre select ISBN, 'Fantasy' from BookDescription;
-insert into BookGenre select ISBN, 'Science Fiction' from BookDescription;
-insert into BookGenre select ISBN, 'Fiction' from BookDescription;
-insert into BookGenre select ISBN, 'Romance' from BookDescription;
+insert Genre(genreName) values('Fantasy'), ('Science Fiction'), ('Fiction'),
+('Romance');
+
+insert into Book_Genre select ISBN, id from BookDescription, Genre;
 
 insert Author(name) values('Marissa Meyer');
 

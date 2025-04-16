@@ -102,3 +102,16 @@ def book(isbn):
 def checkout(isbn):
     if not session.get('LoggedIn', False): return redirect(url_for('login'))
     return "WIP"
+
+@app.route('/inventory')
+def inventory():
+    if not database.isLibrarian(session['User']):
+        return redirect(url_for('index'))
+
+    return render_template('inventory.html')
+
+@app.route('/newBook')
+def newBook():
+    if not database.isLibrarian(session['User']):
+        return redirect(url_for('index'))
+    return render_template('newBook.html')

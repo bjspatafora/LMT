@@ -38,6 +38,7 @@ class db:
         self.__cursor.execute('commit')
         
     def validate(self, username, code):
+        self.__cursor.execute('delete from Register where validTimeout < NOW()')
         self.__cursor.execute('select * from Register where username=%s and valcode=%s and validTimeout > NOW()', (username, code))
         res = self.__cursor.fetchone()
         if res is None:
@@ -75,10 +76,10 @@ class db:
 
     def getGenres(self):
         # we need a genere table please!!!
-        cmd = "SELECT genre FROM BookGenre";
+        cmd = "SELECT genreName FROM Genre";
         self.__cursor.execute(cmd)
         rows = list(self.__cursor.fetchall());
-        return set([row['genre'] for row in rows])
+        return set([row['genreName'] for row in rows])
     
     def advancedSearch(self, title, author, genre, start=0, size=10):
         cmd = """
@@ -86,11 +87,12 @@ class db:
         FROM BookDescription as BD
              JOIN Book_Author AS BA ON BA.bISBN = BD.ISBN
              JOIN Author as A ON A.id = BA.authorId
-             JOIN BookGenre as BG ON BG.bISBN = BD.ISBN 
+             JOIN Book_Genre as BG ON BG.bISBN = BD.ISBN
+             JOIN Genre as G ON BG.gId=G.id
         """
         conditions = []
         params = []
-        param_names = ["BD.title", "A.name", "BG.genre"]
+        param_names = ["BD.title", "A.name", "G.genreName"]
         for p,v in zip(param_names, [title, author, genre]):
             if v:
                 conditions.append(p + " = %s")
@@ -106,11 +108,12 @@ class db:
     def bookDetails(self, isbn):
         cmd = """
         SELECT BD.title, BD.pubYear as year, BD.synopsis, A.name as author,
-               GROUP_CONCAT(DISTINCT BG.genre) AS genres
+               GROUP_CONCAT(DISTINCT G.genre) AS genres
         FROM BookDescription as BD
              JOIN Book_Author AS BA ON BA.bISBN = BD.ISBN
              JOIN Author as A ON A.id = BA.authorId
-             JOIN BookGenre as BG ON BG.bISBN = BD.ISBN 
+             JOIN Book_Genre as BG ON BG.bISBN = BD.ISBN
+             JOIN Genre as G ON G.id=BG.gId
         WHERE BD.ISBN = %s
         GROUP BY BD.ISBN;
         """

@@ -1,0 +1,18 @@
+<!-- newBook.html -->
+<html>
+  <body>
+    <h1> New Book </h1> <br>
+    <form action='newBookRequest' method='post'>
+    <div style="display: flex; flex-direction: column; width: 200px;">
+    ISBN: <input type='number' name='ISBN' required/> <br>
+    Title: <input type='text' name='title' required/> <br>
+    Authors(comma separated): <input type='text' name='authors' required/> <br>
+    Series: <input type='text' name='series'/> <br>
+    Genres(comma separated): <input type='text' name='genres'/> <br>
+    Synopsis: <input type='text' name='synopsis'/> <br>
+    Year Published: <input type='number' name='pubYear'/> <br>
+    </div>
+    <div style='height:5px;'> <br> </div>
+    <input type='submit' value='Submit'>
+  </body>
+</html>
