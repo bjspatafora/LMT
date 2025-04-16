@@ -108,7 +108,7 @@ class db:
     def bookDetails(self, isbn):
         cmd = """
         SELECT BD.title, BD.pubYear as year, BD.synopsis, A.name as author,
-               GROUP_CONCAT(DISTINCT G.genre) AS genres
+               GROUP_CONCAT(DISTINCT G.genreName) AS genres
         FROM BookDescription as BD
              JOIN Book_Author AS BA ON BA.bISBN = BD.ISBN
              JOIN Author as A ON A.id = BA.authorId
@@ -123,5 +123,14 @@ class db:
         ret['genres'] = ret['genres'].split(',')
         return ret
 
+    def checkouts(self, isbn):
+        cmd = 'select count(*) as n from Checkout join BookStock where bISBN=%s and not returned'
+        self.__cursor.execute(cmd, isbn)
+        return int(self.__cursor.fetchone()['n'])
+    
     def availableCopies(self,isbn):
-        return 4
+        checkedout = self.checkouts(isbn)
+        cmd = 'select total from BookStock where bISBN=%s'
+        self.__cursor.execute(cmd, isbn)
+        return int(self.__cursor.fetchone()['total'])-checkedout
+    

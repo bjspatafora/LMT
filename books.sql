@@ -20,3 +20,5 @@ insert into Book_Author select ISBN, id from BookDescription, Author;
 insert Series(name) values('Lunar Chronicles');
 
 insert into Book_Series select ISBN, id from BookDescription, Series;
+
+insert into BookStock(bISBN, total) select ISBN, 2 from BookDescription;
