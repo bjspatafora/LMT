@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #4a90e2;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .meta {
+      font-size: 0.95rem;
+      color: #777;
+      margin-bottom: 1.5rem;
+    }
+
+    .tag-group {
+      margin-bottom: 1rem;
+    }
+
+    .tag-group strong {
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    .tag {
+      display: inline-block;
+      background-color: #e0e7f9;
+      color: #2c3e50;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      margin-right: 0.5rem;
+      margin-bottom: 0.3rem;
+      font-size: 0.9rem;
+    }
+
+    .description {
+      margin-top: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .actions {
+      margin-top: 2rem;
+      text-align: right;
+    }
+
+    .actions a {
+      text-decoration: none;
+      background-color: #4a90e2;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .actions a:hover {
+      background-color: #357abd;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Online Library - Book Details</h1>
+  </header>
+
+  <div class="container">
+    <div class="title">{{ book['title'] }}</div>
+    <div class="meta">Published: {{ book['year'] }}</div>
+
+    <div class="tag-group">
+      <strong>Author(s):</strong>
+      <span class="tag">{{ book['author'] }}</span>
+    </div>
+
+    <div class="tag-group">
+      <strong>Genres:</strong>
+      {% for genre in book['genres'] %}
+      <span class="tag">{{ genre }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="description">
+      <p>
+        {{ book['synopsis'] }}
+      </p>
+    </div>
+
+    <div class="actions">
+      <a href="{{url_for('checkout',isbn=book['ISBN'])}}">Checkout Book</a>
+    </div>
+    <div class="actions">
+      <a href="{{ url_for('browse') }}">Resume Browsing</a>
+    </div>
+  </div>
+
+</body>
+</html>

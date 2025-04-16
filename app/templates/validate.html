@@ -1,8 +1,17 @@
 <!-- validate.html -->
 <html>
   <body>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {{ category }}: {{ message }}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+            
     <h1>Validate</h1> <br>
-    <form action='validateRequest' method='post'>
+    <form action="" method='post'>
     Please enter the code we have sent to your email below.
     <div style="display: flex; flex-direction: column; width: 200px;">
     Validation Code: <input type='text' name='valcode'/> <br>

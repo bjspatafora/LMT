@@ -2,7 +2,16 @@
 <html>
   <body>
     <h1> Login </h1> <br>
-    <form action='loginRequest' method='post'>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {{ category }}: {{ message }} <br>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form action='' method='post'>
     <div style="display: flex; flex-direction: column; width: 200px;">
     Username: <input type='text' name='username'/> <br>
     Password: <input type='text' name='password'/> <br>
@@ -11,6 +20,5 @@
     <input type='submit' value='Go'> <br>
     </form> 
     Not a member? Register <a href="register">here</a>! <br>
-    {{ error }} <br>
   </body>
 <html>

@@ -8,7 +8,7 @@ from email.mime.base import MIMEBase
 from email import encoders # 2021/3/17: python 3
 #import mimetypes
 import datetime
-from google_app_password import google_app_password
+from app.google_app_password import google_app_password
 
 def sendgmail(to_,
               from_='projectoomooad@gmail.com',

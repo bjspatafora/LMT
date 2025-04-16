@@ -3,7 +3,16 @@
 <html>
   <body>
     <h1>Register</h1> <br>
-    <form action='registerRequest' method='post'>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {{ category }}: {{ message }}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+                
+    <form action='' method='post'>
     <div style="display: flex; flex-direction: column; width: 200px;">
     Username: <input type='text' name='username'/> <br>
     Email: <input type='text' name='email'/> <br>
@@ -12,6 +21,5 @@
     </div>
     <div style='height:5px;'> <br> </div>
     <input type='submit' value='Go'>
-    {{ error }} <br>
   </body>
 </html>

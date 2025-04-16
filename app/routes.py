@@ -1,94 +1,98 @@
 # file : routes.py
-from flask import render_template, request, session, redirect, url_for
+from flask import render_template, request, session, redirect, url_for, flash
 from app import app
-from db import db
+from app.db import db
 
 database = db('root', 'root') #CHANGE TO USER/PASSWORD OF MYSQL
+
+errors = {"emptyField" : "You must enter a %s." }
 
 @app.route('/')
 @app.route('/index')
 def index():
-    if session.get('LoggedIn', None):
-        if database.isLibrarian(session['User']):
-            return render_template('LibrarianIndex.html',
-                                   user=session['User'])
-        else:
-            return render_template('index.html', user=session['User'])
+    #if session.get('LoggedIn',None) and database.isLibrarian(session['User']):
+    #    return render_template('LibrarianIndex.html',user=session['User'])
+    #el
+    if session.get('LoggedIn',None):
+        return render_template('index.html', user=session['User'])
     else:
         return redirect(url_for('login'))
 
-@app.route('/login')
+@app.route('/login', methods = ["GET", "POST"])
 def login():
-    return render_template('login.html', error='')
-
-@app.route('/loginErr')
-def loginErr():
-    return render_template('login.html', error='Invalid username/password')
-
-@app.route('/loginRequest', methods = ["POST"])
-def loginRequest():
-    username = request.form.get("username", None)
-    password = request.form.get("password", None)
-    
-    if database.login(username, password): # valid login Information
-        session['User'] = username
-        session['LoggedIn'] = 1
-        return redirect(url_for('index'))
-    else:
-        return redirect(url_for('loginErr'))
+    if request.method == "POST":
+        form = dict(request.form)
+        empty = [key for key,value in form.items() if value.strip() == ""]
+        if len(empty) != 0:
+            flash(errors["emptyField"] % ', '.join(empty), "Error")
+        elif database.login(form['username'],form['password']):
+            session['User'] = form['username']
+            session['LoggedIn'] = 1
+            return redirect(url_for('index'))
+        else:
+            flash("Invalid login information, please try again.", "Error")
+            
+    return render_template('login.html')
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
-@app.route('/register')
+@app.route('/register', methods = ["GET", "POST"])
 def register():
-    return render_template('register.html', error='')
-
-@app.route('/registerNMPass')
-def registerNMPass():
-    return render_template('register.html', error='Passwords did not match')
-
-@app.route('/registerUsedUser')
-def registerUsedUser():
-    return render_template('register.html', error='Username already taken')
-
-@app.route('/registerEError')
-def registerEError():
-    return render_template('register.html', error='Could not send email')
-
-@app.route('/registerRequest', methods = ["POST"])
-def registerRequest():
-    username = request.form.get("username", None)
-    email = request.form.get("email", None)
-    password = request.form.get("password", None)
-    password2 = request.form.get("password2", None)
-
-    if password != password2:
-        return redirect(url_for('registerNMPass'))
-    elif database.availUsername(username):
-        session['User'] = username
-        code = database.insertReg(username, email, password)
-        if code is None:
-            return redirect(url_for('registerEError'))
+    form = dict(request.form)
+    empty = [key for key,value in form.items() if value.strip() == ""]
+    if len(empty) != 0:
+        flash(errors["emptyField"] % ', '.join(empty), "Error")
+    elif form["password"] != form["password2"]:
+        flash("Passwords do not match, please try again.", "Error")
+    elif not database.availUsername(form["username"]):
+        flash("Username is already taken, please choose another and " \
+              "try again.", "Error")
+    else:
+        session['User'] = form["username"]
+        code = database.insertReg(form["username"], form["email"],
+                                  form["password"])
+        if not code:
+            flash("Could not send validation email, please try again.",
+                  "Error")
         else:
             return redirect(url_for('validate'))
-    else:
-        return redirect(url_for('registerUsedUser'))
+    
+    return render_template('register.html')
 
-@app.route('/validate')
+@app.route('/validate', methods = ["GET", "POST"])
 def validate():
+    if request.method == "POST":
+        code = request.form.get("valcode", None)
+        if not code:
+            session['User'] = None
+            return redirect(url_for('index'))
+        elif database.validate(session['User'], code): #codes match
+            return redirect(url_for('index'))
+        else:
+            flash("Incorrect code, please try again.", "Error")
+    
     return render_template('validate.html')
 
-@app.route('/validateRequest', methods = ["POST"])
-def validateRequest():
-    code = request.form.get("valcode", None)
+@app.route('/browse', methods = ["GET"])
+def browse():
+    form = dict(request.args)
+    title = form.get('title','')
+    author = form.get('author','')
+    genres = form.get('genres')
+    
+    books = database.advancedSearch(title,author,genres)
+        
+    return render_template('browse.html',books=books,
+                           genres=database.getGenres())
 
-    if code is None:
-        session['User'] = None
-        return redirect(url_for('index'))
-    elif database.validate(session['User'], code): #codes match
-        return redirect(url_for('index'))
-    else:
-        return render_template('validateRetry.html')
+@app.route('/book/<isbn>')
+def book(isbn):
+    book = database.bookDetails(int(isbn))
+    return render_template('book.html', book=book)
+
+@app.route('/checkout/<isbn>')
+def checkout(isbn):
+    return "WIP"
