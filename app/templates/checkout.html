@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Checkout Status</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+</head>
+<body>
+  <div class="container">
+    <div class="back-button-container">
+      <a href="index.html" class="back-button">← Back to Catalog</a>
+    </div>
+
+    <div class="section">
+      <h1 class="title">Checkout Status</h1>
+      <p class="meta">Here’s the current status of the book.</p>
+
+      <div class="description">
+        <p><strong>Book Title:</strong> Introduction to Machine Learning</p>
+        <p><strong>Author:</strong> Jane Smith</p>
+        <p><strong>Book ID:</strong> ML-1023</p>
+        <p><strong>Published:</strong> 2021</p>
+      </div>
+
+      <div class="tag-group">
+        <strong>Status:</strong>
+        <!-- Swap the tag class depending on availability -->
+        <span class="tag" style="background-color: #d4edda; color: #155724;">Available</span>
+        <!-- Example alternatives:
+        <span class="tag" style="background-color: #fff3cd; color: #856404;">Checked Out</span>
+        <span class="tag" style="background-color: #f8d7da; color: #721c24;">Removed from Library</span>
+        -->
+      </div>
+
+      <div class="actions">
+        <a href="mybooks.html">View My Books</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

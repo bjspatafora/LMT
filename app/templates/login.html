@@ -1,24 +1,51 @@
 <!-- login.html -->
 <html>
-  <body>
-    <h1> Login </h1> <br>
+<head>
+  <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+</head>
+<body>
+  <header>
+  <h1> Login </h1> <br>
+  </header>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  {% if category == "Error" %}
+  <div class="error-box">
+    <span class="close-btn" onclick="closeErrorBox(this)">×</span>
+    <p>{{ message }}</p>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+  
+  <script>
+    // Display all error boxes
+    document.querySelectorAll('.error-box').forEach(function(box) {
+        box.style.display = "block";
+    });
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                {{ category }}: {{ message }} <br>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    
-    <form action='' method='post'>
-    <div style="display: flex; flex-direction: column; width: 200px;">
-    Username: <input type='text' name='username'/> <br>
-    Password: <input type='text' name='password'/> <br>
-    </div>
-    <div style='height:5px;'> <br> </div>
-    <input type='submit' value='Go'> <br>
-    </form> 
-    Not a member? Register <a href="register">here</a>! <br>
-  </body>
+    // Close error box when the close button is clicked
+    function closeErrorBox(button) {
+        var errorBox = button.parentElement;
+        errorBox.style.display = "none"; // Hide the error box
+    }
+  </script>
+  
+  <div class="container">
+    <form action='' method='POST' class="search-form"
+          style="flex-direction: column;
+                 max-width: 300px; align-items: stretch;">
+      <input type="text" name="username" placeholder="Username..."
+             class="search-input" />
+      <input type="password" name="password" placeholder="Password..."
+             class="search-input" />
+      <button type='submit' class="search-button">Go</button>
+      <a href="register" class="search-button"
+         style="text-align: center;">Register</a>
+    </form>
+  </div>
+</body>
 <html>

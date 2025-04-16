@@ -119,3 +119,6 @@ class db:
         ret['ISBN'] = isbn # cheeky putting isbn into the book w/out query
         ret['genres'] = ret['genres'].split(',')
         return ret
+
+    def availableCopies(self,isbn):
+        return 4

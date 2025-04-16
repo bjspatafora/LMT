@@ -1,0 +1,228 @@
+/* Global Styles */
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f9;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #4a90e2;
+  color: white;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+/* Layout */
+.container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.container.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Typography */
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.meta {
+  font-size: 0.95rem;
+  color: #777;
+  margin-bottom: 1.5rem;
+}
+
+.section {
+  padding: 2rem;
+}
+
+.section h2 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: #333;
+  text-align: center;
+}
+
+/* Tags */
+.tag-group {
+  margin-bottom: 1rem;
+}
+
+.tag-group strong {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #e0e7f9;
+  color: #2c3e50;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+}
+
+/* Description and Actions */
+.description {
+  margin-top: 1.5rem;
+  line-height: 1.6;
+}
+
+.actions {
+ text-align: right;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.back-button-container {
+  text-align: left;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.actions a,
+.search-button,
+.nav-button,
+.info-button {
+  background-color: #4a90e2;
+  color: white;
+  text-decoration: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-button,
+.nav-button {
+  font-size: 1rem;
+  border-radius: 6px;
+}
+
+.nav-button {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 0.7rem 1.4rem;
+}
+
+.actions a:hover,
+.search-button:hover,
+.nav-button:hover,
+.info-button:hover {
+  background-color: #357abd;
+}
+
+.back-button {
+  background-color: #e0e0e0;
+  color: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: #ccc;
+}
+
+/* Search */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.search-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  max-width: 1000px;
+}
+
+.search-input,
+.filter-input {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 180px;
+  max-width: 100%;
+}
+
+/* Book Cards */
+.book-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.book-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.book-author {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 1rem
+}
+
+.info-button {
+  align-self: start;
+  padding: 0.5rem 1rem;
+}
+
+/* Button Row */
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.error-box {
+    position: absolute;
+    top: 50%;
+    right: 5%;
+    background-color: #f44336; /* Red background */
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    width: 300px;
+    text-align: center;
+}
+
+.close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+}
