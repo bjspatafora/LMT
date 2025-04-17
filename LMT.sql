@@ -28,7 +28,7 @@ CREATE TABLE `Author` (
   `name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,6 +52,7 @@ CREATE TABLE `BookDescription` (
   `title` varchar(100) DEFAULT NULL,
   `pubYear` int(11) DEFAULT NULL,
   `synopsis` text DEFAULT NULL,
+  `totalStock` int(11) DEFAULT NULL,
   PRIMARY KEY (`ISBN`),
   KEY `title` (`title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
@@ -64,32 +65,6 @@ CREATE TABLE `BookDescription` (
 LOCK TABLES `BookDescription` WRITE;
 /*!40000 ALTER TABLE `BookDescription` DISABLE KEYS */;
 /*!40000 ALTER TABLE `BookDescription` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `BookStock`
---
-
-DROP TABLE IF EXISTS `BookStock`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `BookStock` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `bISBN` bigint(13) NOT NULL,
-  `total` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `bISBN` (`bISBN`),
-  CONSTRAINT `BookStock_ibfk_1` FOREIGN KEY (`bISBN`) REFERENCES `BookDescription` (`ISBN`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `BookStock`
---
-
-LOCK TABLES `BookStock` WRITE;
-/*!40000 ALTER TABLE `BookStock` DISABLE KEYS */;
-/*!40000 ALTER TABLE `BookStock` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -179,16 +154,16 @@ DROP TABLE IF EXISTS `Checkout`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Checkout` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `stockId` int(11) NOT NULL,
+  `bISBN` bigint(13) NOT NULL,
   `uId` int(11) NOT NULL,
   `dueDate` date NOT NULL,
   `returned` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`),
-  KEY `stockId` (`stockId`),
+  KEY `bISBN` (`bISBN`),
   KEY `uId` (`uId`),
-  CONSTRAINT `Checkout_ibfk_1` FOREIGN KEY (`stockId`) REFERENCES `BookStock` (`id`),
+  CONSTRAINT `Checkout_ibfk_1` FOREIGN KEY (`bISBN`) REFERENCES `BookDescription` (`ISBN`),
   CONSTRAINT `Checkout_ibfk_2` FOREIGN KEY (`uId`) REFERENCES `User` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -212,7 +187,7 @@ CREATE TABLE `Genre` (
   `genreName` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `genreName` (`genreName`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -263,7 +238,7 @@ CREATE TABLE `Series` (
   `name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -315,4 +290,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-16 16:04:50
+-- Dump completed on 2025-04-16 18:59:35

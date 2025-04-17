@@ -124,13 +124,47 @@ class db:
         return ret
 
     def checkouts(self, isbn):
-        cmd = 'select count(*) as n from Checkout join BookStock where bISBN=%s and not returned'
+        cmd = 'select count(*) as n from Checkout join BookDescription on bISBN=ISBN where bISBN=%s and not returned'
         self.__cursor.execute(cmd, isbn)
         return int(self.__cursor.fetchone()['n'])
     
     def availableCopies(self,isbn):
         checkedout = self.checkouts(isbn)
-        cmd = 'select total from BookStock where bISBN=%s'
+        cmd = 'select totalStock from BookDescription where ISBN=%s'
         self.__cursor.execute(cmd, isbn)
-        return int(self.__cursor.fetchone()['total'])-checkedout
+        return int(self.__cursor.fetchone()['totalStock'])-checkedout
     
+    def addCheckout(self, isbn, user):
+        cmd= """
+        INSERT INTO Checkout(bISBN, uId, dueDate)
+        SELECT ISBN, id, %s from BookDescription join User
+        WHERE ISBN=%s and username=%s
+        """
+        dueDate= date.today() + timedelta(days=7)
+        self.__cursor.execute(cmd, (dueDate, isbn, user))
+
+    def getCheckouts(self, user):
+        cmd = """
+        SELECT B.ISBN, B.title, GROUP_CONCAT(A.name) as authors, C.dueDate from
+        (select * from Checkout where uId=(select id from User where username=%s))as C
+        JOIN BookDescription as B on C.bISBN=B.ISBN
+        JOIN Book_Author on ISBN=Book_Author.bISBN
+        JOIN Author as A on authorId=A.id
+        WHERE not returned GROUP BY B.ISBN
+        """
+        self.__cursor.execute(cmd, user)
+        curr = self.__cursor.fetchone()
+        ret = []
+        while curr is not None:
+            curr['authors'] = curr['authors'].split(',')
+            ret.insert(curr)
+            curr = self.__cursor.fetchone()
+        return ret
+
+    def checkoutReturned(self, user, ISBN):
+        cmd = """
+        update Checkout set returned=1
+        where uId=(select id from User where username=%s) and
+        bISBN=%s
+        """
+        self.__cursor.execute(cmd, (user, ISBN))
