@@ -168,3 +168,63 @@ class db:
         bISBN=%s
         """
         self.__cursor.execute(cmd, (user, ISBN))
+
+    def newBook(self, isbn, title, authors, pubyear, genres, synopsis, amount):
+        cmd = """
+        insert BookDescription(ISBN, title, pubYear, synopsis, totalStock)
+        values(%s, %s, %s, %s, %s)
+        """
+        self.__cursor.execute(cmd, (isbn, title, pubyear, synopsis, amount))
+
+        cmd = """
+        insert Author(name) values(%s)
+        """
+        cmd1 = """
+        insert into Book_Author(bISBN, authorId)
+        select %s, id from Author where name=%s
+        """
+        for a in authors:
+            try:
+                self.__cursor.execute(cmd, a)
+            except:
+                pass
+            self.__cursor.execute(cmd1, (isbn, a))
+
+        cmd = """
+        insert Genre(genreName) values(%s)
+        """
+        cmd1 = """
+        insert into Book_Genre(bISBN, gId)
+        select %s, id from Genre where genreName=%s
+        """
+        for g in genres:
+            try:
+                self.__cursor.execute(cmd, g)
+            except:
+                pass
+            self.__cursor.execute(cmd1, (isbn, g))
+
+    def changeStock(self, isbn, amount):
+        cmd = """
+        update BookDescription set totalStock=%s where ISBN=%s
+        """
+        self.__cursor.execute(cmd, (amount, isbn))
+
+    def modifyBookTitle(self, isbn, title):
+        cmd = """
+        update BookDescription set title=%s where ISBN=%s
+        """
+        self.__cursor.execute(cmd, (title, isbn))
+
+    def modifyBookYear(self, isbn, year):
+        cmd = """
+        update BookDescription set pubYear=%s where ISBN=%s
+        """
+        self.__cursor.execute(cmd, (year, isbn))
+
+    def modifyBookSynopsis(self, isbn, synopsis):
+        cmd = """
+        update BookDescription set synopsis=%s where ISBN=%s
+        """
+        self.__cursor.execute(cmd, (synopsis, ISBN))
+    
