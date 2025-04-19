@@ -101,7 +101,16 @@ def book(isbn):
 @app.route('/checkout/<isbn>')
 def checkout(isbn):
     if not session.get('LoggedIn', False): return redirect(url_for('login'))
-    return "WIP"
+    if database.numCheckouts(session['User']) > 2:
+        return "You've reached the checkout limit"
+    if database.isCheckedOut(isbn, session['User']):
+        return "You already have this book"
+    avail = database.availableCopies(isbn)
+    if avail < 1:
+        return "book is not currently available for checkouts"
+    dueDate = database.addCheckout(isbn, session['User'])
+    book = database.bookDetails(isbn)
+    return render_template('pendingCheckout.html', book=book, dueDate=dueDate)
 
 @app.route('/inventory')
 def inventory():

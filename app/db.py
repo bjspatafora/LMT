@@ -8,10 +8,16 @@ import bcrypt
 
 class db:
     def __init__(self, usr, pwd):
+        print("INITIALIZING!!!")
         self.__conn = pymysql.connect(user=usr, passwd=pwd)
         self.__cursor = self.__conn.cursor(pymysql.cursors.DictCursor)
         self.__cursor.execute('use LMT')
 
+    def __del__(self):
+        self.__conn.commit()
+        self.__cursor.close()
+        self.__conn.close()
+    
     def insertReg(self, username, email, password):
         code = 0
         for i in range(1, 6):
@@ -29,13 +35,13 @@ class db:
         timestamp = datetime.now() + timedelta(minutes=30)
         self.__cursor.execute('insert Register(username, email, password, salt, validTimeout, valcode) values(%s, %s, %s, %s, %s, %s)',
                               (username, email, pwd, salt, timestamp, code))
-        self.__cursor.execute('commit')
+        self.__conn.commit()
         return code
 
     def insertUser(self, username, email, password, salt):
         self.__cursor.execute('delete from Register where username=%s', (username))
         self.__cursor.execute('insert User(username, email, password, salt) values(%s, %s, %s, %s)', (username, email, password, salt))
-        self.__cursor.execute('commit')
+        self.__conn.commit()
         
     def validate(self, username, code):
         self.__cursor.execute('delete from Register where validTimeout < NOW()')
@@ -123,26 +129,49 @@ class db:
         ret['genres'] = ret['genres'].split(',')
         return ret
 
-    def checkouts(self, isbn):
-        cmd = 'select count(*) as n from Checkout join BookDescription on bISBN=ISBN where bISBN=%s and not returned'
-        self.__cursor.execute(cmd, isbn)
-        return int(self.__cursor.fetchone()['n'])
+    def numTotalCheckouts(self, isbn):
+        self.__conn.commit()
+        cmd = 'select count(*) as n from Checkout where bISBN=%s'
+        self.__cursor.execute(cmd, isbn)    
+        return self.__cursor.fetchone()['n']
+
+    def numHolds(self, isbn):
+        cmd = """
+        SELECT count(*) as n from Hold where bISBN=%s
+        """
+        self.__cursor.execute(cmd, (isbn,))
+        return self.__cursor.fetchone()['n']
     
     def availableCopies(self,isbn):
-        checkedout = self.checkouts(isbn)
-        cmd = 'select totalStock from BookDescription where ISBN=%s'
-        self.__cursor.execute(cmd, isbn)
-        return int(self.__cursor.fetchone()['totalStock'])-checkedout
+        unavailable = self.numTotalCheckouts(isbn) + self.numHolds(isbn)
+        cmd = 'select totalStock-%s as n from BookDescription where ISBN=%s'
+        self.__cursor.execute(cmd, (unavailable,isbn))
+        return self.__cursor.fetchone()['n']
     
     def addCheckout(self, isbn, user):
-        cmd= """
-        INSERT INTO Checkout(bISBN, uId, dueDate)
-        SELECT ISBN, id, %s from BookDescription join User
-        WHERE ISBN=%s and username=%s
-        """
-        dueDate= date.today() + timedelta(days=7)
+        if(isinstance(user, str)):
+            cmd0 = """
+            delete from Hold where bISBN=%s and
+            uId=(select id from User where username=%s)
+            """
+            cmd= """
+            INSERT INTO Checkout(bISBN, uId, dueDate)
+            SELECT ISBN, id, %s from BookDescription join User
+            WHERE ISBN=%s and username=%s
+            """
+        else:
+            cmd0 = """
+            delete from Hold where bISBN=%s and uId=%s
+            """
+            cmd = """
+            insert Checkout(dueDate, bISBN, uId) values(%s, %s, %s)
+            """
+        dueDate= datetime.date(datetime.today() + timedelta(days=7))
+        self.__cursor.execute(cmd0, (isbn, user))
         self.__cursor.execute(cmd, (dueDate, isbn, user))
-
+        self.__conn.commit()
+        return dueDate
+        
     def getCheckouts(self, user):
         cmd = """
         SELECT B.ISBN, B.title, GROUP_CONCAT(A.name) as authors, C.dueDate from
@@ -161,6 +190,33 @@ class db:
             curr = self.__cursor.fetchone()
         return ret
 
+    def numCheckouts(self, user):
+        if isinstance(user, str):
+            cmd = """
+            select count(*) as n from Checkout
+            where uId=(select id from User where username=%s)
+            and not returned
+            """
+        else:
+            cmd = """
+            select count(*) as n from Checkout where uId=%s and not returned
+            """
+        self.__cursor.execute(cmd, user)
+        return int(self.__cursor.fetchone()['n'])
+
+    def isCheckedOut(self, ISBN, user):
+        if isinstance(user, str):
+            cmd = """
+            select * from Checkout where bISBN=%s and
+            uId=(select id from User where username=%s) and not returned
+            """
+        else:
+            cmd = """
+            select * from Checkout where bISBN=%s and uid=%s and not returned
+            """
+        self.__cursor.execute(cmd, (ISBN, user))
+        return self.__cursor.fetchone() is not None
+    
     def checkoutReturned(self, user, ISBN):
         cmd = """
         update Checkout set returned=1
@@ -168,7 +224,64 @@ class db:
         bISBN=%s
         """
         self.__cursor.execute(cmd, (user, ISBN))
+        cmd = """
+        select * from Waitlist where bISBN=%s order by submit asc limit 1
+        """
+        self.__cursor.execute(cmd, (ISBN))
+        res = self.__cursor.fetchone()
+        if res is not None:
+            cmd = """
+            delete from Waitlist where id=%s
+            """
+            self.__cursor.execute(cmd, res['id'])
+            self.addHold(int(res['bISBN']), int(res['uId']))
 
+    def addHold(self, isbn, uId):
+        cmd = """
+        insert Hold(bISBN, uId, end) values(%s, %s, %s)
+        """
+        end = datetime.today() + timedelta(days=2)
+        self.__cursor.execute(cmd, (isbn, uId, end))
+        self.__conn.commit()
+
+    def removeHold(self, isbn, uId):
+        cmd = """
+        delete from Hold where bISBN=%s and uId=%s
+        """
+        self.__cursor.execute(cmd, (isbn, uId))
+        self.__conn.commit()
+        
+    def holdToCheckout(self, isbn, uId):
+        self.removeHold(isbn, uId)
+        self.addCheckout(isbn, uId)
+
+    def updateHolds(self):
+        cmd = """
+        select * from Hold where end < NOW()
+        """
+        self.__cursor.execute(cmd)
+        noResponse = self.__cursor.fetchall()
+
+        cmd = """
+        delete from Hold where end < NOW()
+        """
+        self.__cursor.execute(cmd)
+        self.__conn.commit()
+        
+        newHolds = []
+        for hold in noResponse:
+            cmd = """
+            select * from Waitlist where bISBN=%s order by submit asc limit 1
+            """
+            self.__cursor.execute(cmd, int(hold['bISBN']))
+            res = self.__cursor.fetchone()
+            if res is not None:
+                newHolds.insert([int(res['uId']), int(res['bISBN'])])
+                self.deleteWaitlist(int(res['bISBN']), int(res['uId']))
+                self.addHold(int(res['bISBN']), int(res['uId']))
+        self.__conn.commit()
+        return newHolds
+            
     def newBook(self, isbn, title, authors, pubyear, genres, synopsis, amount):
         cmd = """
         insert BookDescription(ISBN, title, pubYear, synopsis, totalStock)
@@ -203,28 +316,53 @@ class db:
             except:
                 pass
             self.__cursor.execute(cmd1, (isbn, g))
+        self.__conn.commit()
 
     def changeStock(self, isbn, amount):
         cmd = """
         update BookDescription set totalStock=%s where ISBN=%s
         """
         self.__cursor.execute(cmd, (amount, isbn))
-
+        self.__conn.commit()
+        
     def modifyBookTitle(self, isbn, title):
         cmd = """
         update BookDescription set title=%s where ISBN=%s
         """
         self.__cursor.execute(cmd, (title, isbn))
-
+        self.__conn.commit()
+        
     def modifyBookYear(self, isbn, year):
         cmd = """
         update BookDescription set pubYear=%s where ISBN=%s
         """
         self.__cursor.execute(cmd, (year, isbn))
-
+        self.__conn.commit()
+        
     def modifyBookSynopsis(self, isbn, synopsis):
         cmd = """
         update BookDescription set synopsis=%s where ISBN=%s
         """
         self.__cursor.execute(cmd, (synopsis, ISBN))
-    
+        self.__conn.commit()
+        
+    def addWaitlist(self, isbn, user):
+        cmd = """
+        insert into Waitlist(bISBN, uId)
+        select %s, id from User where username=%s
+        """
+        self.__cursor.execute(cmd, (isbn, user))
+        self.__conn.commit()
+        
+    def deleteWaitlist(self, isbn, user):
+        if isinstance(user, int):
+            cmd = """
+            delete from Waitlist where bISBN=%s and
+            uId=(select id from User where username=%s)
+            """
+        else:
+            cmd = """
+            delete from Waitlist where bISBN=%s and uId=%s
+            """
+        self.__cursor.execute(cmd, (isbn, user))
+        self.__conn.commit()

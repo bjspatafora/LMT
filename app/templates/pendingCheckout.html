@@ -1,0 +1,21 @@
+<!-- pendingCheckout.html -->
+
+<html>
+  <body>
+    <h1>Checking Out</h1> <br>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {{ category }}: {{ message }}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    Title: {{ book['title'] }} <br>
+    Author(s): {{ book['author'] }} <br>
+    Due Date: {{ dueDate }} <br>
+    
+    <a href="{{ url_for('browse') }}">Browse</a>
+  </body>
+</html>

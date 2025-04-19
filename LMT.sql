@@ -28,7 +28,7 @@ CREATE TABLE `Author` (
   `name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,12 +158,13 @@ CREATE TABLE `Checkout` (
   `uId` int(11) NOT NULL,
   `dueDate` date NOT NULL,
   `returned` tinyint(1) DEFAULT 0,
+  `renew` int(11) DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `bISBN` (`bISBN`),
   KEY `uId` (`uId`),
   CONSTRAINT `Checkout_ibfk_1` FOREIGN KEY (`bISBN`) REFERENCES `BookDescription` (`ISBN`),
   CONSTRAINT `Checkout_ibfk_2` FOREIGN KEY (`uId`) REFERENCES `User` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -187,7 +188,7 @@ CREATE TABLE `Genre` (
   `genreName` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `genreName` (`genreName`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -197,6 +198,65 @@ CREATE TABLE `Genre` (
 LOCK TABLES `Genre` WRITE;
 /*!40000 ALTER TABLE `Genre` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Genre` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Hold`
+--
+
+DROP TABLE IF EXISTS `Hold`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Hold` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `bISBN` bigint(13) NOT NULL,
+  `uId` int(11) NOT NULL,
+  `end` date NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `bISBN` (`bISBN`),
+  KEY `uId` (`uId`),
+  CONSTRAINT `Hold_ibfk_1` FOREIGN KEY (`bISBN`) REFERENCES `BookDescription` (`ISBN`),
+  CONSTRAINT `Hold_ibfk_2` FOREIGN KEY (`uId`) REFERENCES `User` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Hold`
+--
+
+LOCK TABLES `Hold` WRITE;
+/*!40000 ALTER TABLE `Hold` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Hold` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Rating`
+--
+
+DROP TABLE IF EXISTS `Rating`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Rating` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bISBN` bigint(13) NOT NULL,
+  `uId` int(11) NOT NULL,
+  `stars` int(11) DEFAULT NULL,
+  `comment` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `bISBN` (`bISBN`),
+  KEY `uId` (`uId`),
+  CONSTRAINT `Rating_ibfk_1` FOREIGN KEY (`bISBN`) REFERENCES `BookDescription` (`ISBN`),
+  CONSTRAINT `Rating_ibfk_2` FOREIGN KEY (`uId`) REFERENCES `User` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Rating`
+--
+
+LOCK TABLES `Rating` WRITE;
+/*!40000 ALTER TABLE `Rating` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Rating` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -238,7 +298,7 @@ CREATE TABLE `Series` (
   `name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -280,6 +340,35 @@ INSERT INTO `User` VALUES
 (6,'Beth','$2b$12$xP6QCC5gegV8KQ/tVnTiM.v6j12/ECaM2aEgtYqya/2w8g6hdJL4i','bspat11037@gmail.com','$2b$12$xP6QCC5gegV8KQ/tVnTiM.',1);
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `Waitlist`
+--
+
+DROP TABLE IF EXISTS `Waitlist`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Waitlist` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `bISBN` bigint(13) NOT NULL,
+  `uId` int(11) NOT NULL,
+  `submit` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `bISBN` (`bISBN`),
+  KEY `uId` (`uId`),
+  CONSTRAINT `Waitlist_ibfk_1` FOREIGN KEY (`bISBN`) REFERENCES `BookDescription` (`ISBN`),
+  CONSTRAINT `Waitlist_ibfk_2` FOREIGN KEY (`uId`) REFERENCES `User` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Waitlist`
+--
+
+LOCK TABLES `Waitlist` WRITE;
+/*!40000 ALTER TABLE `Waitlist` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Waitlist` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -290,4 +379,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-16 18:59:35
+-- Dump completed on 2025-04-18 20:59:45

@@ -12,3 +12,6 @@ r:
 db:
 	mysql --user=root --password=root --database=LMT < LMT.sql
 
+dump:
+	mysql --user='root' --password='root' < cleardb.sql
+	mysqldump -u root -p LMT > LMT.sql
