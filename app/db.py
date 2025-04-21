@@ -267,21 +267,42 @@ class db:
         """
         self.__cursor.execute(cmd)
         self.__conn.commit()
-        
-        newHolds = []
+
+        date = datetime.date(datetime.today() + datetime.timedelta(days=2))
         for hold in noResponse:
             cmd = """
-            select * from Waitlist where bISBN=%s order by submit asc limit 1
+            select * from Waitlist join User on uId=User.id
+            join BookDescription on bISBN=ISBN
+            where bISBN=%s order by submit asc limit 1
             """
             self.__cursor.execute(cmd, int(hold['bISBN']))
             res = self.__cursor.fetchone()
             if res is not None:
-                newHolds.insert([int(res['uId']), int(res['bISBN'])])
-                self.deleteWaitlist(int(res['bISBN']), int(res['uId']))
-                self.addHold(int(res['bISBN']), int(res['uId']))
+                self.deleteWaitlist(res['bISBN'], res['uId'])
+                self.addHold(res['bISBN'], res['uId'])
+                myemail.verifemail(res['email'], {'User':res['username'],
+                                                  'Book':res['title'],
+                                                  'Date':date}, 1)
         self.__conn.commit()
-        return newHolds
-            
+
+    def getUserHolds(self, user):
+        if isinstance(user, int):
+            cmd = """
+            select * from Hold join BookDescription on bISBN=ISBN where uId=%s
+            """
+        else:
+            cmd = """
+            select * from Hold join BookDescription on bISBN=ISBN where
+            uId=(select id from User where username=%s)
+            """
+        self.__cursor.execute(cmd, user)
+        ret = []
+        curr = self.__cursor.fetchone()
+        while curr is not None:
+            ret.insert(curr)
+            curr = self.__cursor.fetchone()
+        return ret
+    
     def newBook(self, isbn, title, authors, pubyear, genres, synopsis, amount):
         cmd = """
         insert BookDescription(ISBN, title, pubYear, synopsis, totalStock)

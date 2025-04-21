@@ -2,10 +2,18 @@
 from flask import render_template, request, session, redirect, url_for, flash
 from app import app
 from app.db import db
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 database = db('root', 'root') #CHANGE TO USER/PASSWORD OF MYSQL
 
 errors = {"emptyField" : "You must enter a %s." }
+
+dailyUpdates = BackgroundScheduler()
+dailyUpdates.add_job(func=database.updateHolds, trigger="interval", hours=24)
+dailyUpdates.start()
+
+atexit.register(lambda: dailyUpdates.shutdown())
 
 @app.route('/')
 @app.route('/index')
@@ -107,7 +115,8 @@ def checkout(isbn):
         return "You already have this book"
     avail = database.availableCopies(isbn)
     if avail < 1:
-        return "book is not currently available for checkouts"
+        database.addWaitlist(isbn, session['User'])
+        return "You've been added to the waitlist!"
     dueDate = database.addCheckout(isbn, session['User'])
     book = database.bookDetails(isbn)
     return render_template('pendingCheckout.html', book=book, dueDate=dueDate)

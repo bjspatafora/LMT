@@ -60,11 +60,21 @@ def sendgmail(to_,
         NOW = datetime.datetime.now()
         raise Exception("ERROR: Please report error  %s" % NOW)
 
-def verifemail(email, code):
-    message = 'This code will expire in 30 minutes: %s' % code
-    sendgmail(to_=email,
-              from_='projectlmtdb@gmail.com',
-              subject='LMT Verification Code',
-              text= message,
-              html='<html><body>%s</body></html>' % message,
-              )
+def verifemail(email, info, t=0):
+    match(t):
+        case 0:
+            message = 'This code will expire in 30 minutes: %s' % info
+            sendgmail(to_=email,
+                      from_='projectlmtdb@gmail.com',
+                      subject='LMT Verification Code',
+                      text= message,
+                      html='<html><body>%s</body></html>' % message
+                      )
+        case 1:
+            message = 'Hello %s, %s is now available! We will hold it for you until %s.' % (info['User'], info['Book'], info['Date'])
+            sendgmail(to_email,
+                      from_='projectlmtdb@gmail.com',
+                      subject='LMT Waitlist Notification',
+                      text= message,
+                      html='<html><body>%s</body></html>' % message
+                      )
