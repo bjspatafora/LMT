@@ -16,6 +16,9 @@
     <a class="nav-button" href="browse">Browse Books</a>
     <a class="nav-button" href="logout">Logout</a>
     <a class="nav-button" href="#">View Checked Out Books </a>
+    {% if librarian %}
+    <a class="nav-button" href="newBook">Add Book</a>
+    {% endif %}
     <!-- Add more buttons here -->
   </div>
   <!-- Put other features here: recommended books, newly added books, etc-->

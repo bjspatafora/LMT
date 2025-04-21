@@ -18,11 +18,9 @@ atexit.register(lambda: dailyUpdates.shutdown())
 @app.route('/')
 @app.route('/index')
 def index():
-    #if session.get('LoggedIn',None) and database.isLibrarian(session['User']):
-    #    return render_template('LibrarianIndex.html',user=session['User'])
-    #el
     if session.get('LoggedIn',False):
-        return render_template('index.html', user=session['User'])
+        return render_template('index.html', user=session['User'],
+                               librarian=database.isLibrarian(session['User']))
     else:
         return redirect(url_for('login'))
 
@@ -121,15 +119,21 @@ def checkout(isbn):
     book = database.bookDetails(isbn)
     return render_template('pendingCheckout.html', book=book, dueDate=dueDate)
 
-@app.route('/inventory')
-def inventory():
-    if not database.isLibrarian(session['User']):
-        return redirect(url_for('index'))
-
-    return render_template('inventory.html')
-
-@app.route('/newBook')
+@app.route('/newBook', methods = ["GET", "POST"])
 def newBook():
     if not database.isLibrarian(session['User']):
         return redirect(url_for('index'))
+
+    if request.method == "POST":
+        authors = request.form.get('authors').split(',')
+        genres = request.form.get('genres', None)
+        if genres is not None:
+            genres = genres.split(',')
+        database.newBook(request.form.get('ISBN'), request.form.get('title'),
+                         authors, request.form.get('series', None),
+                         request.form.get('pubYear'), genres,
+                         request.form.get('synopsis'),
+                         request.form.get('amount'))
+        flash('New book added', 'success')
+    
     return render_template('newBook.html')

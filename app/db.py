@@ -303,7 +303,8 @@ class db:
             curr = self.__cursor.fetchone()
         return ret
     
-    def newBook(self, isbn, title, authors, pubyear, genres, synopsis, amount):
+    def newBook(self, isbn, title, authors, series, pubyear, genres, synopsis,
+                amount):
         cmd = """
         insert BookDescription(ISBN, title, pubYear, synopsis, totalStock)
         values(%s, %s, %s, %s, %s)
@@ -324,19 +325,34 @@ class db:
                 pass
             self.__cursor.execute(cmd1, (isbn, a))
 
-        cmd = """
-        insert Genre(genreName) values(%s)
-        """
-        cmd1 = """
-        insert into Book_Genre(bISBN, gId)
-        select %s, id from Genre where genreName=%s
-        """
-        for g in genres:
+        if series is not None:
+            cmd = """
+            insert Series(name) values(%s)
+            """
+            cmd1 = """
+            insert into Book_Series(bISBN, seriesId)
+            select %s, id from Series where name=%s
+            """
             try:
-                self.__cursor.execute(cmd, g)
+                self.__cursor.execute(cmd, series)
             except:
                 pass
-            self.__cursor.execute(cmd1, (isbn, g))
+            self.__cursor.execute(cmd1, (isbn, series))
+
+        if genres is not None:
+            cmd = """
+            insert Genre(genreName) values(%s)
+            """
+            cmd1 = """
+            insert into Book_Genre(bISBN, gId)
+            select %s, id from Genre where genreName=%s
+            """
+            for g in genres:
+                try:
+                    self.__cursor.execute(cmd, g)
+                except:
+                    pass
+                self.__cursor.execute(cmd1, (isbn, g))
         self.__conn.commit()
 
     def changeStock(self, isbn, amount):
