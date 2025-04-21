@@ -114,7 +114,7 @@ class db:
     def bookDetails(self, isbn):
         cmd = """
         SELECT BD.title, BD.pubYear as year, BD.synopsis, A.name as author,
-               GROUP_CONCAT(DISTINCT G.genreName) AS genres
+               GROUP_CONCAT(DISTINCT G.genreName) AS genres, BD.totalStock
         FROM BookDescription as BD
              JOIN Book_Author AS BA ON BA.bISBN = BD.ISBN
              JOIN Author as A ON A.id = BA.authorId
@@ -125,8 +125,9 @@ class db:
         """
         self.__cursor.execute(cmd, isbn)
         ret = self.__cursor.fetchone()
-        ret['ISBN'] = isbn # cheeky putting isbn into the book w/out query
-        ret['genres'] = ret['genres'].split(',')
+        if ret is not None:
+            ret['ISBN'] = isbn # cheeky putting isbn into the book w/out query
+            ret['genres'] = ret['genres'].split(',')
         return ret
 
     def numTotalCheckouts(self, isbn):
@@ -368,6 +369,65 @@ class db:
         """
         self.__cursor.execute(cmd, (title, isbn))
         self.__conn.commit()
+
+    def changeBookAuthors(self, isbn, authors):
+        cmd = """
+        delete from Book_Author where isbn=%s
+        """
+        self.__cursor.execute(cmd, isbn)
+        cmd = """
+        insert Author(name) values(%s)
+        """
+        cmd1 = """
+        insert into Book_Author(bISBN, authorId)
+        select %s, id from Author where name=%s
+        """
+        for a in authors:
+            try:
+                self.__cursor.execute(cmd, a)
+            except:
+                pass
+            self.__cursor.execute(cmd1, (isbn, a))
+        self.__conn.commit()
+    
+    def changeBookGenres(self, isbn, genres):
+        cmd = """
+        delete from Book_Genre where bISBN=%s
+        """
+        self.__cursor.execute(cmd, isbn)
+        cmd = """
+        insert Genre(genreName) values(%s)
+        """
+        cmd1 = """
+        insert into Book_Genre(bISBN, gId)
+        select %s, id from Genre where genreName=%s
+        """
+        for g in genres:
+            try:
+                self.__cursor.execute(cmd, g)
+            except:
+                pass
+            self.__cursor.execute(cmd1, (isbn, g))
+        self.__conn.commit()
+
+    def changeBookSeries(self, isbn, series):
+        cmd = """
+        delete from Book_Series where bISBN=%s
+        """
+        self.__cursor.execute(cmd, isbn)
+        cmd = """
+        insert Series(name) values(%s)
+        """
+        try:
+            self.__cursor.execute(cmd, series)
+        except:
+            pass
+        cmd = """
+        insert into Book_Series(bISBN, seriesId)
+        select %s, id from Series where name=%s
+        """
+        self.__cursor.execute(cmd, (isbn, series))
+        self.__conn.commit()
         
     def modifyBookYear(self, isbn, year):
         cmd = """
@@ -380,7 +440,7 @@ class db:
         cmd = """
         update BookDescription set synopsis=%s where ISBN=%s
         """
-        self.__cursor.execute(cmd, (synopsis, ISBN))
+        self.__cursor.execute(cmd, (synopsis, isbn))
         self.__conn.commit()
         
     def addWaitlist(self, isbn, user):

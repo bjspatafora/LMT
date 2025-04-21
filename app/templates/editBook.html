@@ -1,0 +1,26 @@
+<!-- newBook.html -->
+<html>
+  <body>
+    <h1> Edit Book {{ book['ISBN'] }} </h1> <br>
+    <form action='' method='post'>
+    <div style="display: flex; flex-direction: column; width: 200px;">
+    <input type="hidden" name="isbn" value={{ book['ISBN'] }} />
+    Title: <input type='text' name='title' placeholder={{ book['title'] }}/>
+    <br>
+    Authors(comma separated): <input type='text' name='authors'
+                                     placeholder={{ book['author'] }}/> <br>
+    Series: <input type='text' name='series'
+                   placeholder={{ book['series'] }}/> <br>
+    Genres(comma separated): <input type='text' name='genres'
+                                    placeholder={{ book['genres'] }}/> <br>
+    Synopsis: <input type='text' name='synopsis'
+                     placeholder={{ book['synopsis']}}/> <br>
+    Year Published: <input type='number' name='pubYear'
+                           placeholder={{ book['year'] }}/> <br>
+    Number of Copies: <input type='number' name='amount'
+                             placeholder={{ book['totalStock'] }}/> <br>
+    </div>
+    <div style='height:5px;'> <br> </div>
+    <input type='submit' value='Submit'>
+  </body>
+</html>

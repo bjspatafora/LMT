@@ -102,7 +102,8 @@ def book(isbn):
     isbn = int(isbn)
     book = database.bookDetails(isbn)
     avail = database.availableCopies(isbn)
-    return render_template('book.html', book=book, available=avail)
+    return render_template('book.html', book=book, available=avail,
+                           librarian=database.isLibrarian(session['User']))
 
 @app.route('/checkout/<isbn>')
 def checkout(isbn):
@@ -121,6 +122,7 @@ def checkout(isbn):
 
 @app.route('/newBook', methods = ["GET", "POST"])
 def newBook():
+    if not session.get('LoggedIn', False): return redirect(url_for('login'))
     if not database.isLibrarian(session['User']):
         return redirect(url_for('index'))
 
@@ -129,11 +131,50 @@ def newBook():
         genres = request.form.get('genres', None)
         if genres is not None:
             genres = genres.split(',')
-        database.newBook(request.form.get('ISBN'), request.form.get('title'),
-                         authors, request.form.get('series', None),
-                         request.form.get('pubYear'), genres,
-                         request.form.get('synopsis'),
-                         request.form.get('amount'))
-        flash('New book added', 'success')
-    
+        try:
+            database.newBook(request.form.get('ISBN'),
+                             request.form.get('title'),
+                             authors, request.form.get('series', None),
+                             request.form.get('pubYear'), genres,
+                             request.form.get('synopsis'),
+                             request.form.get('amount'))
+            flash('New book added', 'success')
+        except:
+            flash('Could not add new book(does it already exist?)', 'error')
     return render_template('newBook.html')
+
+@app.route('/editBook/<isbn>', methods = ["GET", "POST"])
+def editBook(isbn):
+    if not session.get('LoggedIn', False): return redirect(url_for('login'))
+    if not database.isLibrarian(session['User']):
+        return redirect(url_for('index'))
+    
+    book = database.bookDetails(isbn)
+    
+    if request.method == "POST":
+        title = request.form.get('title', None)
+        if title is not None and title != '':
+            database.modifyBookTitle(isbn, title)
+        series = request.form.get('series', None)
+        if series is not None and series != '':
+            database.changeBookSeries(isbn, series)
+        pubYear = request.form.get('pubYear', None)
+        if pubYear is not None and isinstance(pubYear, int):
+            database.modifyBookYear(isbn, pubYear)
+        synopsis = request.form.get('synopsis', None)
+        if synopsis is not None and synopsis != '':
+            database.modifyBookSynopsis(isbn, synopsis)
+        amount = request.form.get('amount', None)
+        if amount is not None and isinstance(amount, int):
+            database.changeStock(isbn, amount)
+        authors = request.form.get('authors', None)
+        if authors is not None and authors != '':
+            authors = authors.split(',')
+            database.changeBookAuthors(isbn, authors)
+        genres = request.form.get('genres', None)
+        if genres is not None and genres != '':
+            genres = genres.split(',')
+            database.changeBookGenres(isbn, genres)
+        return redirect(url_for('book', isbn=isbn))
+
+    return render_template('editBook.html', book=book)
