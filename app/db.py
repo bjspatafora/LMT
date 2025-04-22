@@ -88,7 +88,7 @@ class db:
         return set([row['genreName'] for row in rows])
     
     def advancedSearch(self, title, author, genre, minrating, start=0,
-                       size=10):
+                       size=20):
         cmd = """
         SELECT DISTINCT BD.ISBN, BD.title, A.name as author
         FROM BookDescription as BD
@@ -117,7 +117,18 @@ class db:
         cmd += "LIMIT %s, %s" % (start, start+size)
         
         self.__cursor.execute(cmd, params)
-        return self.__cursor.fetchall()
+        curr = self.__cursor.fetchone()
+        n = self.__cursor.fetchone()
+        res = []
+        while n is not None:
+            if n['ISBN'] != curr['ISBN']:
+                res.append(curr)
+                curr = n
+            else:
+                curr['author'] += ', ' + n['author']
+            n = self.__cursor.fetchone()
+        res.append(curr)
+        return res
     
     def bookDetails(self, isbn):
         cmd = """

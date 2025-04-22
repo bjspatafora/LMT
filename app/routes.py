@@ -93,11 +93,11 @@ def browse():
     form = dict(request.args)
     title = form.get('title','')
     author = form.get('author','')
-    genres = form.get('genres')
+    genres = form.get('genre')
     rating = form.get('rating', '')
     
     books = database.advancedSearch(title,author,genres,rating)
-        
+
     return render_template('browse.html',books=books,
                            genres=database.getGenres())
 
