@@ -87,7 +87,8 @@ class db:
         rows = list(self.__cursor.fetchall());
         return set([row['genreName'] for row in rows])
     
-    def advancedSearch(self, title, author, genre, start=0, size=10):
+    def advancedSearch(self, title, author, genre, minrating, start=0,
+                       size=10):
         cmd = """
         SELECT DISTINCT BD.ISBN, BD.title, A.name as author
         FROM BookDescription as BD
@@ -95,6 +96,8 @@ class db:
              JOIN Author as A ON A.id = BA.authorId
              JOIN Book_Genre as BG ON BG.bISBN = BD.ISBN
              JOIN Genre as G ON BG.gId=G.id
+             LEFT JOIN (select bISBN, sum(stars)/count(*) as avRating from
+                 Rating) as R on BD.ISBN=R.bISBN
         """
         conditions = []
         params = []
@@ -106,6 +109,11 @@ class db:
         
         if conditions:
             cmd += "WHERE " + " AND ".join(conditions)
+            if minrating:
+                cmd += "R.avRating >= %s " % minrating
+        elif minrating:
+            cmd += "WHERE "
+            cmd += "R.avRating >= %s " % minrating
         cmd += "LIMIT %s, %s" % (start, start+size)
         
         self.__cursor.execute(cmd, params)
@@ -552,3 +560,42 @@ class db:
 
             self.__cursor.execute('commit')
             return "Added" if accepted else "Rejected"
+
+    def addRating(self, isbn, user, stars, comment):
+        cmd = """
+        insert into Rating(bISBN, uId, stars, comment)
+        select %s, id, %s, %s from User where username=%s
+        """
+        self.__cursor.execute(cmd, (isbn, stars, comment, user))
+        self.__conn.commit()
+        
+    def getRating(self, isbn, user):
+        cmd = """
+        select stars, comment from Rating where bISBN=%s and
+        uId=(select id from User where username=%s)
+        """
+        self.__cursor.execute(cmd, (isbn, user))
+        return self.__cursor.fetchone()
+
+    def modifyRating(self, isbn, user, stars):
+        cmd = """
+        update Rating set stars=%s where bISBN=%s and
+        uId=(select id from User where username=%s)
+        """
+        self.__cursor.execute(cmd, (stars, isbn, user))
+        self.__conn.commit()
+
+    def modifyComment(self, isbn, user, comment):
+        cmd = """
+        update Rating set comment=%s where bISBN=%s and
+        uId=(select id from User where username=%s)
+        """
+        self.__cursor.execute(cmd, (comment, isbn, user))
+        self.__conn.commit()
+
+    def averageRating(self, isbn):
+        cmd = """
+        select sum(stars)/count(*) from Rating where bISBN=%s
+        """
+        self.__cursor.execute(cmd, isbn)
+        return self.__cursor.fetchone()

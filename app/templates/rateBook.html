@@ -1,0 +1,15 @@
+<html>
+  <body>
+    <h1> Rate Book {{ isbn }} </h1> <br>
+    <form action='' method='post'>
+    <div style="display: flex; flex-direction: column; width: 200px;">
+    <input type="hidden" name="isbn" value={{ isbn }} />
+    Stars(0-5): <input type='number' name='stars'
+                  placeholder={{ rating['stars'] }} required/> <br>
+    Comment: <input type='text' name='comment'
+                    placeholder={{ rating['comment'] }}/> <br>
+    </div>
+    <div style='height:5px;'> <br> </div>
+    <input type='submit' value='Submit'>
+  </body>
+</html>

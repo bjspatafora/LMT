@@ -57,6 +57,9 @@
       <a href="{{url_for('checkout',isbn=book['ISBN'])}}">Checkout Book</a>
       {% endif %}
     </div>
+    <div class="actions">
+      <a href="{{ url_for('rateBook', isbn=book['ISBN']) }}">Rate Book</a>
+    </div>
     {% if librarian %}
     <div class="actions">
       <a href="{{ url_for('editBook',isbn=book['ISBN']) }}">Edit Book</a>

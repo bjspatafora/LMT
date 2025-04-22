@@ -94,8 +94,9 @@ def browse():
     title = form.get('title','')
     author = form.get('author','')
     genres = form.get('genres')
+    rating = form.get('rating', '')
     
-    books = database.advancedSearch(title,author,genres)
+    books = database.advancedSearch(title,author,genres,rating)
         
     return render_template('browse.html',books=books,
                            genres=database.getGenres())
@@ -133,6 +134,34 @@ def checkout(isbn):
                            renews=2, renew_len="7 Days")
 """
 
+@app.route('/rateBook/<isbn>', methods = ["GET", "POST"])
+def rateBook(isbn):
+    if not session.get('LoggedIn', False): return redirect(url_for('login'))
+
+    rating = database.getRating(isbn, session['User'])
+    if request.method == "POST":
+        if rating is not None:
+            stars = request.form.get('stars')
+            if stars is not None:
+                database.modifyRating(isbn, session['User'], stars)
+            comment = request.form.get('comment')
+            if comment is not None and comment != '':
+                database.modifyComment(isbn, session['User'], comment)
+        else:
+            comment = request.form.get('comment')
+            if comment is None:
+                comment = ''
+            database.addRating(isbn, session['User'],
+                               request.form.get('stars'), comment)
+        return redirect(url_for('book', isbn=isbn))
+
+    if rating is None:
+        rating = {}
+        rating['stars']=''
+        rating['comment']=''
+    return render_template('rateBook.html', isbn=isbn, rating=rating)
+        
+        
 @app.route('/newBook', methods = ["GET", "POST"])
 def newBook():
     if not session.get('LoggedIn', False): return redirect(url_for('login'))

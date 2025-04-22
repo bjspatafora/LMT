@@ -28,6 +28,15 @@
       <option value="{{ genre }}">{{ genre }}</option>
       {% endfor %}
     </select>
+    <select name="rating" class="filter-input">
+      <option value="">All Stars</option>
+      <option value=0>Rated</option>
+      <option value=1>1+ Stars</option>
+      <option value=2>2+ Stars</option>
+      <option value=3>3+ Stars</option>
+      <option value=4>4+ Stars</option>
+      <option value=5>5 Stars</option>
+    </select>
     <button type="submit" class="search-button">Search</button>
   </form>
   </div>
