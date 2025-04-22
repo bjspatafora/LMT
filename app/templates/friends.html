@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Library - Home</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+
+    header {
+      background-color: #4a90e2;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+
+    .outer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+    }
+
+    .grid-title {
+      font-weight: bold;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 0.5rem;
+    }
+
+    .inner-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .friend {
+        display: flex;
+        background-color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        width: 90%;
+        align-items: center;
+    }
+
+    .more-button {
+        cursor: pointer;
+        font-size:20px;
+        color: #555;
+        border: none;
+        background: none;
+    }
+
+    .dropdown {
+        margin-left: 80%;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: white;
+        min-width: 160px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        border-radius: 6px;
+        z-index: 1;
+    }
+
+    .dropdown-menu button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background: none;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .dropdown-menu button:hover {
+        background-color: #f1f1f1;
+    }
+    
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Friend Info</h1>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  {% if category == "Error" %}
+  <div class="error-box" style="top:40%;">
+    <span class="close-btn" onclick="closeBox(this)">×</span>
+    <p>{{ message }}</p>
+  </div>
+  {% elif category == "Update" %}
+  <div class="update-box" style="top:40%;">
+    <span class="close-btn" onclick="closeBox(this)">×</span>
+    <p>{{ message }}</p>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+  
+  <script>
+    function closeBox(button)
+    {
+        var box = button.parentElement;
+        box.style.display = "none"; // Hide the error box
+    }
+  </script>
+  
+  
+  <div class="back-button-container">
+  <a class="back-button" href="index">← Back to Home</a>
+  </div>
+  
+  <div class="search-container" style="margin-bottom: 0rem; margin-top:1rem;">
+    <form action="" method="POST" class="search-form" style="width: 70%;">
+      <input type="text" name="friend" placeholder="Add friend..."
+             class="search-input" style="width: 100%" required>
+      <button type="submit" class="search-button">Send Request</button>
+    </form>
+  </div>
+  <div class="outer-grid">
+
+    <!-- Friend List -->
+    <div class="card">
+      <div class="grid-title">Friend List ({{ friends|length }})</div>
+      <div class="inner-grid">
+        {% for friend in friends %}
+        <div class="friend">
+          {{ friend }}
+          <div class="dropdown">
+            <button class="more-button" onclick="showDropdown(this)">
+              &#8942;</button>
+            <div class="dropdown-menu">
+
+              <form action="{{ url_for('viewHistory', name=friend) }}"
+                    method="GET" style="display:inline;">
+                <button onlick="">View History</button>
+              </form>
+              
+              <form action="{{ url_for('unfriend', name=friend) }}"
+                    method="post" style="display:inline;">
+                <button type="submit">Unfriend</button>
+              </form>
+
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Friend Request List -->
+    <div class="card">
+      <div class="grid-title">
+        Friend Requests({{ friendRequests|length }})
+      </div>
+      <div class="inner-grid">
+        {% for request in friendRequests %}
+        <div class="friend">
+          {{ request }}
+          <div class="dropdown">
+            <button class="more-button" onclick="showDropdown(this)">
+              &#8942;
+            </button>
+            <div class="dropdown-menu">
+              
+              <form action="{{url_for('updateFR',name=request,accepted='Y')}}"
+                    method="POST" style="display:inline;">
+                <button type="submit">Accept</button>
+              </form>
+
+              <form action="{{url_for('updateFR',name=request,accepted='N')}}"
+                    method="POST" style="display:inline;">
+                <button type="submit">Reject</button>
+              </form>
+              
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+  </div>
+
+  <script>
+    function hideAllDropdown() {
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.style.display = 'none';
+    });
+    }
+    
+    function toggleDropdown(button) {
+        const menu = button.parentElement.querySelector('.dropdown-menu');
+        const isVisible = menu && menu.style.display === 'block';
+        
+        hideAllDropdown();
+        
+        if (menu && !isVisible) {
+            menu.style.display = 'block';
+        }
+    }
+    
+    document.addEventListener('click', function(event) {
+        const isMoreButton = event.target.closest('.more-button');
+        const isInsideDropdown = event.target.closest('.dropdown-menu');
+        
+        if (isMoreButton) {
+            toggleDropdown(isMoreButton);
+        } else if (!isInsideDropdown) {
+            hideAllDropdown();
+        }
+    });
+     
+  </script>
+  
+</body>
+</html>
+

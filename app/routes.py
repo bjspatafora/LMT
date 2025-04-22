@@ -1,9 +1,13 @@
 # file : routes.py
+
 from flask import render_template, request, session, redirect, url_for, flash
 from app import app
 from app.db import db
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+
+from datetime import datetime, timedelta, date
+
 
 database = db('root', 'root') #CHANGE TO USER/PASSWORD OF MYSQL
 
@@ -120,6 +124,15 @@ def checkout(isbn):
     book = database.bookDetails(isbn)
     return render_template('pendingCheckout.html', book=book, dueDate=dueDate)
 
+"""
+    book = database.bookDetails(isbn)
+    today = date.today()
+    due = today + timedelta(days=7)
+    
+    return render_template('checkout.html', book=book, date=today, due=due,
+                           renews=2, renew_len="7 Days")
+"""
+
 @app.route('/newBook', methods = ["GET", "POST"])
 def newBook():
     if not session.get('LoggedIn', False): return redirect(url_for('login'))
@@ -178,3 +191,53 @@ def editBook(isbn):
         return redirect(url_for('book', isbn=isbn))
 
     return render_template('editBook.html', book=book)
+
+@app.route('/waitlist/<isbn>')
+def waitlist(isbn):
+    return ""
+
+@app.route('/friends', methods=["POST", "GET"])
+def friends():
+    if request.method == "POST":
+        other = request.form.get('friend', None)
+        if other and other == session['User']:
+            flash('You cannot add yourself as a friend', "Error")
+        elif other:
+            status = database.addFriend(session['User'], other)
+            if status == "DNE":
+                flash("User '%s' does not exist." % other, "Error")
+            elif status == "Friends":
+                flash("You are already friends with User '%s'." % other,
+                      "Error")
+            elif status == "Requested":
+                flash("You have already friend requested User '%s'." \
+                      % other, "Error")
+            elif status == "Sent":
+                flash("Sent User '%s' a friend request." % other,"Update")
+            elif status == "Added":
+                flash("Added User '%s' as a friend." % other, "Update")
+            
+    fs = database.friends(session['User'])
+    rs = database.friendRequests(session['User'])
+    return render_template('friends.html',friends=fs, friendRequests=rs)
+
+@app.route('/unfriend/<name>', methods=['POST'])
+def unfriend(name):
+    status = database.removeFriendship(session['User'],name)
+    if status == "DNE": flash("User '%s' does not exist." % name, "Error")
+    elif status == "Not Friends":
+        flash("You are not friends with User '%s.'" % name, "Error")
+    else:
+        flash("Removed User '%s' as a friend." % name, "Update")
+    return redirect(url_for('friends'))
+
+@app.route('/history/<name>')
+def viewHistory(name):
+    return "WIP"
+
+@app.route('/updateFR/<name>/<accepted>', methods=['POST'])
+def updateFR(name, accepted):
+    status = database.userHandleFR(session['User'], name, accepted=='Y')
+    if status == "DNE": flash("User '%s' does not exist." % name, "Error")
+    else: flash("%s User '%s'." % (status, name), "Update")
+    return redirect(url_for('friends'))

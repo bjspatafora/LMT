@@ -94,6 +94,7 @@ header {
 
 /* Buttons */
 .actions a,
+.dropdown-button,
 .search-button,
 .nav-button,
 .info-button {
@@ -205,19 +206,22 @@ header {
   flex-wrap: wrap;
 }
 
-.error-box {
+.error-box,
+.update-box {
     position: absolute;
     top: 50%;
     right: 5%;
     background-color: #f44336; /* Red background */
     color: white;
-    padding: 15px;
+    padding: 5px;
     border-radius: 5px;
     z-index: 1000;
-    display: none; /* Hidden by default */
+    display: block; /* Shown by default */
     width: 300px;
     text-align: center;
 }
+
+.update-box { background-color: green; }
 
 .close-btn {
     position: absolute;

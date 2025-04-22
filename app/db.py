@@ -1,7 +1,7 @@
 # db.py
 
 import pymysql
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import random
 from app import myemail
 import bcrypt
@@ -463,3 +463,92 @@ class db:
             """
         self.__cursor.execute(cmd, (isbn, user))
         self.__conn.commit()
+
+    def userId(self, user):
+        self.__cursor.execute("SELECT id FROM User WHERE username=%s", user)
+        q = self.__cursor.fetchone()
+        return None if q is None else q['id']
+    
+    def friends(self, user):
+        cmd = """
+        SELECT u1.username as un1, u2.username as un2
+        FROM Friends
+             JOIN User AS u1 ON u1.id = Friends.user1_id
+             JOIN User AS u2 on u2.id = Friends.user2_id
+        WHERE u1.username = %s OR u2.username = %s
+        """
+        self.__cursor.execute(cmd, (user, user))
+        query = self.__cursor.fetchall()
+        return {row['un1'] if row['un1'] != user else row['un2'] for row in query}
+
+    def friendRequests(self, user):
+        cmd = """
+        SELECT u_from.username
+        FROM FriendRequests
+             JOIN User AS u_from ON u_from.id = FriendRequests.from_id
+             JOIN User AS u_to ON u_to.id = FriendRequests.to_id
+        WHERE u_to.username = %s
+        """
+        self.__cursor.execute(cmd, user)
+        query = self.__cursor.fetchall()
+        return {row['username'] for row in query}
+    
+    
+    def addFriend(self, sender, reciever):
+        cmd = "select * from User where username=%s"
+        self.__cursor.execute(cmd, reciever)
+        if self.__cursor.fetchone() is not None:
+            senderId = self.userId(sender)
+            recieverId = self.userId(reciever)
+            if reciever in self.friends(sender): return "Friends"
+            elif sender in self.friendRequests(reciever): return "Requested"
+            elif reciever in self.friendRequests(sender):
+                cmd = """DELETE FROM FriendRequests
+                WHERE from_id = %s and to_id = %s """
+                self.__cursor.execute(cmd, (recieverId, senderId))
+                cmd = """ INSERT INTO Friends (user1_id, user2_id)
+                VALUES (%s, %s)"""
+                self.__cursor.execute(cmd, (senderId, recieverId))
+                self.__cursor.execute('commit')
+                return "Added"
+            else:
+                cmd = """INSERT INTO FriendRequests (from_id, to_id)
+                VALUES (%s, %s) """
+                self.__cursor.execute(cmd, (senderId, recieverId))
+                self.__cursor.execute('commit')
+                return "Sent"
+            
+        return "DNE"
+
+    def removeFriendship(self, u1, u2):
+        u1id, u2id = self.userId(u1), self.userId(u2)
+        if None in [u1id, u2id]:
+            return "DNE"
+        elif u2 not in self.friends(u1):
+            return "Not Friends"
+        else:
+            cmd = """DELETE FROM Friends
+            WHERE (user1_id = %s AND user2_id = %s)
+            OR (user1_id = %s and user2_id = %s)
+            """
+            self.__cursor.execute(cmd, (u1id, u2id, u2id, u1id) )
+            self.__cursor.execute('commit')
+            return "Removed"
+        
+    
+    def userHandleFR(self, user, other, accepted):
+        user_id, other_id = self.userId(user), self.userId(other)
+        if None in [user_id, other_id]:
+            return "DNE"
+        else:
+            cmd = """DELETE FROM FriendRequests
+            WHERE from_id = %s and to_id = %s """
+            self.__cursor.execute(cmd, (other_id, user_id))
+        
+            if accepted:
+                cmd = """ INSERT INTO Friends (user1_id, user2_id)
+                VALUES (%s, %s)"""
+                self.__cursor.execute(cmd, (user_id, other_id))
+
+            self.__cursor.execute('commit')
+            return "Added" if accepted else "Rejected"

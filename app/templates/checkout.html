@@ -2,40 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Book Checkout Status</title>
+  <title>Confirm Checkout</title>
   <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
 </head>
 <body>
+  <header>
+    <h1>Confirm Checkout</h1>
+  </header>
+
   <div class="container">
-    <div class="back-button-container">
-      <a href="index.html" class="back-button">← Back to Catalog</a>
+    <div class="section">
+      <h2 class="title">Book Information</h2>
+      <p><strong>Title:</strong> <span class="book-title">{{ book['title'] }}</span></p>
+      <p><strong>Author:</strong> <span class="book-author">{{ book['author'] }}</span></p>
+      <p><strong>ISBN:</strong> {{ book['ISBN'] }}</p>
     </div>
 
     <div class="section">
-      <h1 class="title">Checkout Status</h1>
-      <p class="meta">Here’s the current status of the book.</p>
-
-      <div class="description">
-        <p><strong>Book Title:</strong> Introduction to Machine Learning</p>
-        <p><strong>Author:</strong> Jane Smith</p>
-        <p><strong>Book ID:</strong> ML-1023</p>
-        <p><strong>Published:</strong> 2021</p>
-      </div>
-
-      <div class="tag-group">
-        <strong>Status:</strong>
-        <!-- Swap the tag class depending on availability -->
-        <span class="tag" style="background-color: #d4edda; color: #155724;">Available</span>
-        <!-- Example alternatives:
-        <span class="tag" style="background-color: #fff3cd; color: #856404;">Checked Out</span>
-        <span class="tag" style="background-color: #f8d7da; color: #721c24;">Removed from Library</span>
-        -->
-      </div>
-
-      <div class="actions">
-        <a href="mybooks.html">View My Books</a>
-      </div>
+      <h2 class="title">Checkout Details</h2>
+      <p><strong>Date:</strong> {{ date }}</p>
+      <p><strong>Due:</strong> {{ due }}</p>
+      <p><strong>Number of Renewals:</strong> {{ renews }}</p>
+      <p><strong>Renewal Length:</strong> {{ renew_len }}</p>
     </div>
+
   </div>
 </body>
 </html>

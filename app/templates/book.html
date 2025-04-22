@@ -7,7 +7,6 @@
   <title>Book Details</title>
 </head>
 <body>
-
   <header>
     <h1>Online Library - Book Details</h1>
   </header>
@@ -27,7 +26,11 @@
     </div>
     <div class="tag-group">
       <Strong>Availability:</strong>
-      {% if available <= 0 %}
+      {% if available < 0 %}
+      <span class="tag" style="background-color: #f8d7da; color: #721c24;">
+        Not Carried
+      </span>
+      {% elif available == 0 %}
       <span class="tag" style="background-color: #f8d7da; color: #721c24;">
         Waitlisted
       </span>
@@ -48,7 +51,11 @@
       </p>
     </div>
     <div class="actions">
+      {% if available == 0 %}
+      <a href="{{url_for('waitlist',isbn=book['ISBN'])}}">Join Waitlist</a>
+      {% elif available > 0 %}
       <a href="{{url_for('checkout',isbn=book['ISBN'])}}">Checkout Book</a>
+      {% endif %}
     </div>
     {% if librarian %}
     <div class="actions">
