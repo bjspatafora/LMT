@@ -52,7 +52,7 @@
     </div>
     <div class="actions">
       {% if available == 0 %}
-      <a href="{{url_for('waitlist',isbn=book['ISBN'])}}">Join Waitlist</a>
+      <a href="{{url_for('checkout',isbn=book['ISBN'])}}">Join Waitlist</a>
       {% elif available > 0 %}
       <a href="{{url_for('checkout',isbn=book['ISBN'])}}">Checkout Book</a>
       {% endif %}

@@ -129,17 +129,25 @@ def book(isbn):
 @app.route('/checkout/<isbn>')
 def checkout(isbn):
     if not session.get('LoggedIn', False): return redirect(url_for('login'))
-    if database.numCheckouts(session['User']) > 2:
+    elif database.numCheckouts(session['User']) > 2: #only have 3 books ch-out
         return "You've reached the checkout limit"
-    if database.isCheckedOut(isbn, session['User']):
+    elif database.isCheckedOut(isbn, session['User']):
         return "You already have this book"
-    avail = database.availableCopies(isbn)
-    if avail < 1:
-        database.addWaitlist(isbn, session['User'])
-        return "You've been added to the waitlist!"
-    dueDate = database.addCheckout(isbn, session['User'])
-    book = database.bookDetails(isbn)
-    return render_template('pendingCheckout.html', book=book, dueDate=dueDate)
+    elif database.onWaitlist(session['User'], isbn):
+        return "You are already on the waitlist for this book";
+    elif database.isOnHold(session['User'], isbn):
+        uid = database.userId(session['User'])
+        database.holdToCheckout(isbn, uid)
+        return "You have taken this book off hold and checked it out."
+    else:
+        avail = database.availableCopies(isbn)
+        if avail < 1:
+            database.addWaitlist(isbn, session['User'])
+            return "You've been added to the waitlist!"
+        dueDate = database.addCheckout(isbn, session['User'])
+        book = database.bookDetails(isbn)
+        return render_template('pendingCheckout.html',
+                               book=book, dueDate=dueDate)
 
 """
     book = database.bookDetails(isbn)
@@ -286,3 +294,19 @@ def updateFR(name, accepted):
     if status == "DNE": flash("User '%s' does not exist." % name, "Error")
     else: flash("%s User '%s'." % (status, name), "Update")
     return redirect(url_for('friends'))
+
+@app.route('/mybooks', methods=["GET","POST"])
+def mybooks():
+    checked = database.getCheckouts(session['User'])
+    holds = database.getUserHolds(session['User'])
+    waits = database.getUserWaitlists(session['User'])
+
+    #return '\n'.join([str(checked), str(holds), str(waits)])
+    
+    return render_template('mybooks.html', checked=checked,
+                           waits=waits, holds=holds) 
+    
+@app.route('/returnBook/<isbn>')
+def returnBook(isbn):
+    database.checkoutReturned(session['User'], isbn)
+    return redirect(url_for('mybooks'))

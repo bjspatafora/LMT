@@ -10,6 +10,28 @@
     <h1>Confirm Checkout</h1>
   </header>
 
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  {% if category == "Error" %}
+  <div class="error-box" style="top:40%;">
+    <span class="close-btn" onclick="closeBox(this)">×</span>
+    <p>{{ message }}</p>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  <script>
+    function closeBox(button)
+    {
+        var box = button.parentElement;
+        box.style.display = "none"; // Hide the error box
+    }
+  </script>
+  
+  
   <div class="container">
     <div class="section">
       <h2 class="title">Book Information</h2>
@@ -25,7 +47,9 @@
       <p><strong>Number of Renewals:</strong> {{ renews }}</p>
       <p><strong>Renewal Length:</strong> {{ renew_len }}</p>
     </div>
-
+    <div class="actions">
+       <a href="{{url_for('browse',isbn=book['ISBN'])}}">Back to Browse</a>
+     </div>    
   </div>
 </body>
 </html>

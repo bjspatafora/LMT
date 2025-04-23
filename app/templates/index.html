@@ -15,7 +15,7 @@
   <div class="button-row">
     <a class="nav-button" href="{{ url_for('browse') }}">Browse Books</a>
     <a class="nav-button" href="{{ url_for('logout') }}">Logout</a>
-    <a class="nav-button" href="#">View Checked Out Books </a>
+    <a class="nav-button" href="{{ url_for('mybooks') }}">My Books</a>
     {% if librarian %}
     <a class="nav-button" href="newBook">Add Book</a>
     {% endif %}

@@ -153,7 +153,10 @@ class db:
 
     def numTotalCheckouts(self, isbn):
         self.__conn.commit()
-        cmd = 'select count(*) as n from Checkout where bISBN=%s'
+        cmd = """select count(*) as n
+        from Checkout
+        where bISBN=%s and not returned"""
+        
         self.__cursor.execute(cmd, isbn)    
         return self.__cursor.fetchone()['n']
 
@@ -193,7 +196,7 @@ class db:
         self.__cursor.execute(cmd, (dueDate, isbn, user))
         self.__conn.commit()
         return dueDate
-        
+    
     def getCheckouts(self, user):
         cmd = """
         SELECT B.ISBN, B.title, GROUP_CONCAT(A.name) as authors, C.dueDate from
@@ -208,7 +211,7 @@ class db:
         ret = []
         while curr is not None:
             curr['authors'] = curr['authors'].split(',')
-            ret.insert(curr)
+            ret.append(curr)
             curr = self.__cursor.fetchone()
         return ret
 
@@ -307,21 +310,41 @@ class db:
                                                   'Date':date}, 1)
         self.__conn.commit()
 
+    def isOnHold(self, user, isbn):
+        cmd = """
+        select Hold.id from Hold join User on Hold.uId = User.id
+        where User.username = %s and Hold.bISBN = %s
+        """
+        self.__cursor.execute(cmd, (user, isbn))
+        return self.__cursor.fetchone() is not None
+        
     def getUserHolds(self, user):
         if isinstance(user, int):
             cmd = """
-            select * from Hold join BookDescription on bISBN=ISBN where uId=%s
+            select BD.title, GROUP_CONCAT(A.name) as authors, H.end, BD.ISBN
+            from Hold as H
+            join BookDescription as BD on H.bISBN=BD.ISBN
+            join Book_Author as BA on H.bISBN = BA.bISBN
+            join Author as A on A.id = BA.authorID
+            where uId=%s
+            GROUP BY BD.ISBN
             """
         else:
             cmd = """
-            select * from Hold join BookDescription on bISBN=ISBN where
-            uId=(select id from User where username=%s)
+            select BD.title, GROUP_CONCAT(A.name) as authors, H.end, BD.ISBN
+            from Hold as H
+            join BookDescription as BD on H.bISBN=BD.ISBN
+            join Book_Author as BA on H.bISBN = BA.bISBN
+            join Author as A on A.id = BA.authorID
+            where uId=(select id from User where username=%s)
+            GROUP BY BD.ISBN
             """
         self.__cursor.execute(cmd, user)
         ret = []
         curr = self.__cursor.fetchone()
         while curr is not None:
-            ret.insert(curr)
+            #curr['authors'] = curr['authors'].split(',')
+            ret.append(curr)
             curr = self.__cursor.fetchone()
         return ret
     
@@ -471,6 +494,15 @@ class db:
         """
         self.__cursor.execute(cmd, (isbn, user))
         self.__conn.commit()
+
+    def onWaitlist(self, user, isbn):
+        cmd = """
+        select W.id from Waitlist as W
+        Join User as U on W.uId = U.id
+        where U.username = %s and W.bISBN = %s
+        """
+        self.__cursor.execute(cmd, (user, isbn))
+        return self.__cursor.fetchone() is not None
         
     def deleteWaitlist(self, isbn, user):
         if isinstance(user, int):
@@ -485,6 +517,29 @@ class db:
         self.__cursor.execute(cmd, (isbn, user))
         self.__conn.commit()
 
+    def getUserWaitlists(self, user):
+        if isinstance(user, int):
+            pass
+        elif isinstance(user, str):
+            cmd = """
+            select BD.ISBN, BD.title, GROUP_CONCAT(A.name) as authors
+            from Waitlist as W
+            join BookDescription as BD on W.bISBN = BD.ISBN
+            join User as U on U.id = W.uId
+            join Book_Author as BA on BA.bISBN = BD.ISBN
+            join Author as A on A.id = BA.authorId
+            where U.username = %s
+            group by BD.ISBN
+            """
+            self.__cursor.execute(cmd, user)
+            curr = self.__cursor.fetchone()
+            ret = []
+            while curr is not None:
+                curr['authors'] = curr['authors'].split(',')
+                ret.append(curr)
+                curr = self.__cursor.fetchone()
+            return ret
+        
     def userId(self, user):
         self.__cursor.execute("SELECT id FROM User WHERE username=%s", user)
         q = self.__cursor.fetchone()

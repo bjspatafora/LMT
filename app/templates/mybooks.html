@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Library - mybooks</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+  <style>
+    .outer-grid {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    .inner-grid {
+        display: grid;
+        frid-template-columns: repeat(2, 1fr);
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+    }
+
+    .grid-title {
+      font-weight: bold;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 0.5rem;
+    }
+
+    .book {
+        display: grid;
+        background-color: #e0e0e0;
+        padding: 10px 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        width: 95%;
+        align-items: center;
+        gap: 0px;
+        margin-bottom: 0.5rem;
+    }
+
+    .nav-button {
+        float: right;
+        margin-below: auto;
+    }
+    
+  </style>
+</head>
+<body>
+  <header>
+    <h1>My Books</h1>
+  </header>
+  <div class="back-button-container">
+  <a class="back-button" href="{{ url_for('index') }}">← Back to Home</a>
+  </div>
+
+  <div class="outer-grid">
+
+    <!-- Checked out Books -->
+    <div class="card">
+      <div class="grid-title">Checked Out Books ({{ checked|length }})</div>
+      {% for book in checked %}
+      <div class="book">
+        <div class="inner-grid">
+          
+          <div style="grid-column: 1;">
+            <p> <strong>Title: </strong> {{ book['title'] }} </p>
+            <p> <strong>Author(s): </strong>{{', '.join(book['authors'])}}</p>
+            <p> <strong>Due: </strong>{{ book['dueDate'] }} </p>
+            <p> <strong>ISBN: </strong> {{ book['ISBN'] }} </p>
+          </div>
+          
+          <div style="grid-column: 2;">
+            <br> <br>
+            <a class="nav-button" href="#">
+              Renew
+            </a>
+            <br> <br> <br>
+            <a class="nav-button"
+               href="{{url_for('returnBook',isbn=book['ISBN'])}}">
+              Return
+            </a> 
+          </div>
+        
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Books On Hold-->
+    <div class="card">
+      <div class="grid-title">Books on Hold ({{ holds|length }})</div>
+      {% for book in holds %}
+      <div class="book">
+        <div class="inner-grid">
+          
+          <div style="grid-column: 1;">
+            <p> <strong>Title: </strong> {{ book['title'] }} </p>
+            <p> <strong>Author(s): </strong>{{', '.join(book['authors'])}}</p>
+            <p> <strong>Checkout By: </strong>{{ book['end'] }} </p>
+            <p> <strong>ISBN: </strong> {{ book['ISBN'] }} </p>
+          </div>
+          
+          <div style="grid-column: 2;">
+            <br> <br>
+            <a class="nav-button"
+               href="{{ url_for('checkout', isbn=book['ISBN']) }}">
+              Check Out
+            </a>
+             
+          </div>
+        
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Waitlisted Books -->
+    <div class="card">
+      <div class="grid-title">Waitlisted Books ({{ waits|length }})</div>
+      {% for book in waits %}
+      <div class="book">
+        <div class="inner-grid">
+          
+          <div style="grid-column: 1;">
+            <p> <strong>Title: </strong> {{ book['title'] }} </p>
+            <p> <strong>Author(s): </strong>{{', '.join(book['authors'])}}</p>
+            <p> <strong>ISBN: </strong> {{ book['ISBN'] }} </p>
+            <p> <strong>Position: </strong> TODO </p>
+          </div>
+         
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    
+  </div>
+
+</body>
+</html>
+
