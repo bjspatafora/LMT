@@ -131,8 +131,10 @@ class db:
         return res
     
     def bookDetails(self, isbn):
+        isbn = int(isbn)
         cmd = """
-        SELECT BD.title, BD.pubYear as year, BD.synopsis, A.name as author,
+        SELECT BD.title, BD.pubYear as year, BD.synopsis,
+               GROUP_CONCAT(DISTINCT A.name) as author,
                GROUP_CONCAT(DISTINCT G.genreName) AS genres, BD.totalStock
         FROM BookDescription as BD
              JOIN Book_Author AS BA ON BA.bISBN = BD.ISBN
@@ -610,3 +612,52 @@ class db:
         """
         self.__cursor.execute(cmd, isbn)
         return self.__cursor.fetchone()
+
+    def getFriendRecents(self, user):
+        cmd = """
+        select bISBN from Checkout where uId in
+        (select user1_id from Friends where
+            user2_id=(select id from User where username=%s) union
+            select user2_id from Friends where
+            user1_id=(select id from User where username=%s)) limit 10
+        """
+        self.__cursor.execute(cmd, (user, user))
+        return self.__cursor.fetchall()
+
+    def getFriendLikes(self, user):
+        cmd = """
+        select bISBN from Rating where uId in
+        (select user1_id from Friends where
+            user2_id=(select id from User where username=%s) union
+            select user2_id from Friends where
+            user1_id=(select id from User where username=%s))
+        and stars > 3 limit 10
+        """
+        self.__cursor.execute(cmd, (user, user))
+        return self.__cursor.fetchall()
+
+    def getPopular(self):
+        cmd = """
+        SELECT BD.title, GROUP_CONCAT(DISTINCT A.name) as author
+        FROM BookDescription as BD
+             JOIN Book_Author AS BA ON BA.bISBN = BD.ISBN
+             JOIN Author as A ON A.id = BA.authorId
+             LEFT JOIN (select bISBN, sum(stars)/count(*) as avRating
+                        from Rating) as R on BD.ISBN=R.bISBN
+        group by BD.ISBN order by R.avRating desc LIMIT 10
+        """
+        self.__cursor.execute(cmd)
+        return self.__cursor.fetchall()
+
+    def getStartedSeriesBooks(self, user):
+        cmd = """
+        select bISBN from Book_Series where seriesId in
+        (select seriesId from Checkout join Book_Series
+            on Checkout.bISBN=Book_Series.bISBN
+            where uId=(select id from User where username=%s)) and
+        bISBN not in (select bISBN from Checkout where
+            uId=(select id from User where username=%s)) limit 10
+        """
+        self.__cursor.execute(cmd, (user, user))
+        return self.__cursor.fetchall()
+    

@@ -23,8 +23,24 @@ atexit.register(lambda: dailyUpdates.shutdown())
 @app.route('/index')
 def index():
     if session.get('LoggedIn',False):
+        friendRecentsISBN = database.getFriendRecents(session['User'])
+        friendRecents = []
+        for i in friendRecentsISBN:
+            friendRecents.append(database.bookDetails(i['bISBN']))
+        friendLikesISBN = database.getFriendLikes(session['User'])
+        friendLikes = []
+        for i in friendLikesISBN:
+            friendLikes.append(database.bookDetails(i['bISBN']))
+        popular = database.getPopular()
+        seriesBooksISBN = database.getStartedSeriesBooks(session['User'])
+        seriesBooks = []
+        for i in seriesBooksISBN:
+            seriesBooks.append(database.bookDetails(i['bISBN']))
         return render_template('index.html', user=session['User'],
-                               librarian=database.isLibrarian(session['User']))
+                               librarian=database.isLibrarian(session['User']),
+                               friendRecents=friendRecents,
+                               friendLikes=friendLikes, popular=popular,
+                               seriesBooks=seriesBooks)
     else:
         return redirect(url_for('login'))
 
