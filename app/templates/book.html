@@ -17,7 +17,10 @@
       <strong>Author(s):</strong>
       <span class="tag">{{ book['author'] }}</span>
     </div>
-
+    <div class="tag-group">
+      <strong>Rating: </strong>
+      <span class="tag">{{ rating }}</span>
+    </div>
     <div class="tag-group">
       <strong>Genres:</strong>
       {% for genre in book['genres'] %}
@@ -56,8 +59,7 @@
       {% elif available > 0 %}
       <a href="{{url_for('checkout',isbn=book['ISBN'])}}">Checkout Book</a>
       {% endif %}
-    </div>
-    <div class="actions">
+
       <a href="{{ url_for('rateBook', isbn=book['ISBN']) }}">Rate Book</a>
     </div>
     {% if librarian %}
@@ -66,6 +68,7 @@
     </div>
     {% endif %}
     <div class="actions">
+      <a href="{{url_for('ratings', isbn=book['ISBN'])}}">View Ratings</a>
       <a href="{{ url_for('browse') }}">Resume Browsing</a>
     </div>
   </div>

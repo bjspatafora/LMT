@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Library - Home</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+  <style>
+    .review {
+        display: block;
+        background-color: #e0e0e0;
+        padding: 10px 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        width: 95%;
+        align-items: center;
+        gap: 0px;
+        margin-bottom: 0.5rem;
+    }
+
+    
+    .review-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .review-comment {
+        width: 100%;
+        word-break: break-word;
+        white-space: normal;
+        min-width: 0
+    }
+    
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Book Ratings</h1>
+  </header>
+
+  <div class="back-button-container">
+  <a class="back-button" href="{{ url_for('book', isbn=ISBN) }}">
+    ← Back</a>
+  </div>
+
+  <div class="container">
+    
+    {% if not ratings %}
+    {% for r in rs %}
+    
+    <div class="review">
+      <div class="review-grid">
+        <div style="grid-column: 1;">
+          <p><strong>Username: </strong>{{r['username']}}<p>
+        </div>
+
+        <div style="grid-column 2;">
+          <p><strong>Rating: </strong>{{r['stars']}}<p>
+        </div>
+        
+      </div>
+      <p><strong>Comment: </strong><p>
+        <div class="review-comment">
+          <p>{{r['comment']}}<p>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p><strong>This book has no ratings</strong><p>
+    
+    {% endif %}
+  </div>
+</body>
+</html>

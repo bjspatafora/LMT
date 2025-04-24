@@ -636,6 +636,17 @@ class db:
         """
         self.__cursor.execute(cmd, (isbn, stars, comment, user))
         self.__conn.commit()
+
+    def getBookRatings(self, isbn):
+        cmd = """
+        select U.username, R.stars, R.comment
+        from Rating as R
+        join User as U on R.uId = U.id
+        where R.bISBN = %s
+        """
+        self.__cursor.execute(cmd, isbn)
+        return self.__cursor.fetchall()
+        
         
     def getRating(self, isbn, user):
         cmd = """
@@ -663,11 +674,13 @@ class db:
 
     def averageRating(self, isbn):
         cmd = """
-        select sum(stars)/count(*) from Rating where bISBN=%s
+        select sum(stars)/count(*) as avg from Rating where bISBN=%s
         """
         self.__cursor.execute(cmd, isbn)
-        return self.__cursor.fetchone()
-
+        ret = self.__cursor.fetchone()
+        
+        return ret['avg'] if ret is not None else None
+        
     def getFriendRecents(self, user):
         cmd = """
         select DISTINCT bISBN from Checkout where uId in
@@ -715,4 +728,6 @@ class db:
         """
         self.__cursor.execute(cmd, (user, user))
         return self.__cursor.fetchall()
+    
+
     

@@ -123,8 +123,11 @@ def book(isbn):
     isbn = int(isbn)
     book = database.bookDetails(isbn)
     avail = database.availableCopies(isbn)
+    librarian = database.isLibrarian(session['User'])
+    rating = database.averageRating(isbn)
+    if rating is None: rating = "Unrated"
     return render_template('book.html', book=book, available=avail,
-                           librarian=database.isLibrarian(session['User']))
+                           librarian=librarian, rating=rating)
 
 @app.route('/checkout/<isbn>')
 def checkout(isbn):
@@ -301,12 +304,14 @@ def mybooks():
     holds = database.getUserHolds(session['User'])
     waits = database.getUserWaitlists(session['User'])
 
-    #return '\n'.join([str(checked), str(holds), str(waits)])
-    
     return render_template('mybooks.html', checked=checked,
                            waits=waits, holds=holds) 
-    
 @app.route('/returnBook/<isbn>')
 def returnBook(isbn):
     database.checkoutReturned(session['User'], isbn)
     return redirect(url_for('mybooks'))
+
+@app.route('/ratings/<isbn>')
+def ratings(isbn):
+    rs = database.getBookRatings(isbn)
+    return render_template('ratings.html', ISBN=isbn, rs=rs);
