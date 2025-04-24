@@ -670,7 +670,7 @@ class db:
 
     def getFriendRecents(self, user):
         cmd = """
-        select bISBN from Checkout where uId in
+        select DISTINCT bISBN from Checkout where uId in
         (select user1_id from Friends where
             user2_id=(select id from User where username=%s) union
             select user2_id from Friends where
@@ -681,7 +681,7 @@ class db:
 
     def getFriendLikes(self, user):
         cmd = """
-        select bISBN from Rating where uId in
+        select DISTINCT bISBN from Rating where uId in
         (select user1_id from Friends where
             user2_id=(select id from User where username=%s) union
             select user2_id from Friends where
@@ -706,7 +706,7 @@ class db:
 
     def getStartedSeriesBooks(self, user):
         cmd = """
-        select bISBN from Book_Series where seriesId in
+        select DISTINCT bISBN from Book_Series where seriesId in
         (select seriesId from Checkout join Book_Series
             on Checkout.bISBN=Book_Series.bISBN
             where uId=(select id from User where username=%s)) and
