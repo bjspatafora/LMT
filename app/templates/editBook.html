@@ -1,25 +1,59 @@
 <html>
-  <body>
-    <h1> Edit Book {{ book['ISBN'] }} </h1> <br>
-    <form action='' method='post'>
-    <div style="display: flex; flex-direction: column; width: 200px;">
-    <input type="hidden" name="isbn" value={{ book['ISBN'] }} />
-    Title: <input type='text' name='title' placeholder={{ book['title'] }}/>
-    <br>
-    Authors(comma separated): <input type='text' name='authors'
-                                     placeholder={{ book['author'] }}/> <br>
-    Series: <input type='text' name='series'
-                   placeholder={{ book['series'] }}/> <br>
-    Genres(comma separated): <input type='text' name='genres'
-                                    placeholder={{ book['genres'] }}/> <br>
-    Synopsis: <input type='text' name='synopsis'
-                     placeholder={{ book['synopsis']}}/> <br>
-    Year Published: <input type='number' name='pubYear'
-                           placeholder={{ book['year'] }}/> <br>
-    Number of Copies: <input type='number' name='amount'
-                             placeholder={{ book['totalStock'] }}/> <br>
-    </div>
-    <div style='height:5px;'> <br> </div>
-    <input type='submit' value='Submit'>
-  </body>
+<head>
+  <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+</head>
+<body>
+  <header>
+  <h1> Edit Book:{{ book['ISBN'] }} </h1> <br>
+  </header>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  {% if category == "Error" %}
+  <div class="error-box">
+    <span class="close-btn" onclick="closeErrorBox(this)">×</span>
+    <p>{{ message }}</p>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+  
+  <script>
+    // Display all error boxes
+    document.querySelectorAll('.error-box').forEach(function(box) {
+        box.style.display = "block";
+    });
+
+    // Close error box when the close button is clicked
+    function closeErrorBox(button) {
+        var errorBox = button.parentElement;
+        errorBox.style.display = "none"; // Hide the error box
+    }
+  </script>
+  <div class="container">
+    <form action='' method='POST' class="search-form"
+          style="flex-direction: column;
+                 max-width: 300px; align-items: stretch;">
+      <input class="search-input" type='text' name='title'
+             placeholder="Title:{{book['title']}}"/>
+      <input class="search-input" type='text' name='authors'
+             placeholder="Authors:{{book['author']}}"/>
+      <input class="search-input" type='text' name='series'
+             placeholder="Series:{{book['series']}}"/>
+      <input class="search-input" type='text' name='genres'
+             placeholder="Genres:{{book['genres']}}"/>
+      <input class="search-input" type='text' name='synopsis'
+             placeholder="Synopsis:{{book['synopsis']}}"/>
+      <input class="search-input" type='number' name='pubYear'
+             placeholder="Publication Year:{{book['year']}}"/>
+      <input class="search-input" type='number' name='amount'
+             placeholder="Amount:{{book['totalStock']}}"/>
+      <button type='submit' class="search-button">Add</button>
+      <a href="{{url_for('book', isbn=book['ISBN'])}}" class="search-button"
+         style="text-align: center;">Back to Book</a>
+    </form>
+  </div>
+</body>
 </html>

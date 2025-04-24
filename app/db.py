@@ -135,12 +135,15 @@ class db:
         cmd = """
         SELECT BD.title, BD.pubYear as year, BD.synopsis,
                GROUP_CONCAT(DISTINCT A.name) as author,
-               GROUP_CONCAT(DISTINCT G.genreName) AS genres, BD.totalStock
+               GROUP_CONCAT(DISTINCT G.genreName) AS genres, S.name as series,
+               BD.totalStock
         FROM BookDescription as BD
              JOIN Book_Author AS BA ON BA.bISBN = BD.ISBN
              JOIN Author as A ON A.id = BA.authorId
-             JOIN Book_Genre as BG ON BG.bISBN = BD.ISBN
-             JOIN Genre as G ON G.id=BG.gId
+             LEFT JOIN Book_Genre as BG ON BG.bISBN = BD.ISBN
+             LEFT JOIN Genre as G ON G.id=BG.gId
+             LEFT JOIN Book_Series as BS ON BD.ISBN = BS.bISBN
+             LEFT JOIN Series as S ON BS.seriesId = S.id
         WHERE BD.ISBN = %s
         GROUP BY BD.ISBN;
         """
@@ -706,7 +709,7 @@ class db:
 
     def getPopular(self):
         cmd = """
-        SELECT BD.title, GROUP_CONCAT(DISTINCT A.name) as author
+        SELECT BD.ISBN, BD.title, GROUP_CONCAT(DISTINCT A.name) as author
         FROM BookDescription as BD
              JOIN Book_Author AS BA ON BA.bISBN = BD.ISBN
              JOIN Author as A ON A.id = BA.authorId

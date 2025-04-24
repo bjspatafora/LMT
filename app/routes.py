@@ -186,7 +186,9 @@ def rateBook(isbn):
         rating = {}
         rating['stars']=''
         rating['comment']=''
-    return render_template('rateBook.html', isbn=isbn, rating=rating)
+    book = database.bookDetails(isbn)
+    return render_template('rateBook.html', isbn=isbn, rating=rating,
+                           title=book['title'])
         
         
 @app.route('/newBook', methods = ["GET", "POST"])

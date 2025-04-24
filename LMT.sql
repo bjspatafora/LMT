@@ -333,7 +333,7 @@ CREATE TABLE `Checkout` (
   KEY `uId` (`uId`),
   CONSTRAINT `Checkout_ibfk_1` FOREIGN KEY (`bISBN`) REFERENCES `BookDescription` (`ISBN`),
   CONSTRAINT `Checkout_ibfk_2` FOREIGN KEY (`uId`) REFERENCES `User` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -394,8 +394,6 @@ CREATE TABLE `Friends` (
 
 LOCK TABLES `Friends` WRITE;
 /*!40000 ALTER TABLE `Friends` DISABLE KEYS */;
-INSERT INTO `Friends` VALUES
-(5,7);
 /*!40000 ALTER TABLE `Friends` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -483,7 +481,7 @@ CREATE TABLE `Rating` (
   KEY `uId` (`uId`),
   CONSTRAINT `Rating_ibfk_1` FOREIGN KEY (`bISBN`) REFERENCES `BookDescription` (`ISBN`),
   CONSTRAINT `Rating_ibfk_2` FOREIGN KEY (`uId`) REFERENCES `User` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -576,7 +574,7 @@ CREATE TABLE `User` (
   `librarian` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -585,10 +583,6 @@ CREATE TABLE `User` (
 
 LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES
-(5,'test1','$2b$12$AM.KkF6tDtU0xI9ez3z2m.hJ16K5gnSg2k2OnedZSd7ESo8VDAoIq','bspat11037@gmail.com','$2b$12$AM.KkF6tDtU0xI9ez3z2m.',0),
-(6,'Beth','$2b$12$xP6QCC5gegV8KQ/tVnTiM.v6j12/ECaM2aEgtYqya/2w8g6hdJL4i','bspat11037@gmail.com','$2b$12$xP6QCC5gegV8KQ/tVnTiM.',1),
-(7,'emg','$2b$12$Fekg6YL.mpIh/QhO87htIObIbmjbLKgsfNHh8O2vXbHaxp7PVuS7C','egarcia19@cougars.ccis.edu','$2b$12$Fekg6YL.mpIh/QhO87htIO',0);
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -629,3 +623,5 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-04-23 21:16:07

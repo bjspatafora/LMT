@@ -1,26 +1,62 @@
 <!-- newBook.html -->
 <html>
-  <body>
-    <h1> New Book </h1> <br>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    {{ message }}
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-    <form action='newBook' method='post'>
-    <div style="display: flex; flex-direction: column; width: 200px;">
-    ISBN: <input type='number' name='ISBN' required/> <br>
-    Title: <input type='text' name='title' required/> <br>
-    Authors(comma separated): <input type='text' name='authors' required/> <br>
-    Series: <input type='text' name='series'/> <br>
-    Genres(comma separated): <input type='text' name='genres'/> <br>
-    Synopsis: <input type='text' name='synopsis'/> <br>
-    Year Published: <input type='number' name='pubYear'/> <br>
-    Number of Copies: <input type='number' name='amount'/> <br>
-    </div>
-    <div style='height:5px;'> <br> </div>
-    <input type='submit' value='Submit'>
-  </body>
+<head>
+  <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+</head>
+<body>
+  <header>
+  <h1> New Book </h1> <br>
+  </header>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  {% if category == "Error" %}
+  <div class="error-box">
+    <span class="close-btn" onclick="closeErrorBox(this)">×</span>
+    <p>{{ message }}</p>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+  
+  <script>
+    // Display all error boxes
+    document.querySelectorAll('.error-box').forEach(function(box) {
+        box.style.display = "block";
+    });
+
+    // Close error box when the close button is clicked
+    function closeErrorBox(button) {
+        var errorBox = button.parentElement;
+        errorBox.style.display = "none"; // Hide the error box
+    }
+  </script>
+  <div class="container">
+    <form action='' method='POST' class="search-form"
+          style="flex-direction: column;
+                 max-width: 300px; align-items: stretch;">
+      <input type="number" name="ISBN" required class="search-input"
+             placeholder="ISBN"/>
+      <input class="search-input" type='text' name='title' required
+             placeholder="Title"/>
+      <input class="search-input" type='text' name='authors' required
+             placeholder="Authors (comma separated)"/>
+      <input class="search-input" type='text' name='series'
+             placeholder="Series"/>
+      <input class="search-input" type='text' name='genres'
+             placeholder="Genres (comma separated)"/>
+      <input class="search-input" type='text' name='synopsis'
+             placeholder="Synopsis"/>
+      <input class="search-input" type='number' name='pubYear'
+             placeholder="Publication Year"/>
+      <input class="search-input" type='number' name='amount' required
+             placeholder="Amount"/>
+      <button type='submit' class="search-button">Add</button>
+      <a href="{{url_for('index')}}" class="search-button"
+         style="text-align: center;">Back to Home</a>
+    </form>
+  </div>
+</body>
 </html>
